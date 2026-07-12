@@ -1,0 +1,14 @@
+{
+  "name": "nexus-os",
+  "version": "1.0.0",
+  "description": "NexusOS - CareerOS Application Shell and state engines",
+  "main": "dist/OS.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node OS.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.0"
+  }
+}
