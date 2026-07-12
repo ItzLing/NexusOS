@@ -9,5 +9,5 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist"
   },
-  "include": ["OS.ts"]
+  "include": ["src/**/*"]
 }
