@@ -183,12 +183,58 @@ function StageTrack({ stage, onChange }: { stage: HiringStage; onChange: (s: Hir
 }
 
 /* Schedule panel */
-function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeeting: (slot: MeetingSlot) => void }) {
+function SchedulePanel({
+  conv,
+  onSendMeeting,
+  onNavigateToThread,
+}: {
+  conv: Conversation;
+  onSendMeeting: (slot: MeetingSlot, eventId: string) => void;
+  onNavigateToThread: () => void;
+}) {
   const [picked, setPicked] = useState<string | null>(null);
   const [meetingType, setMeetingType] = useState<"video" | "in-person">("video");
+  const [isDispatching, setIsDispatching] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const handleDispatch = () => {
+    if (!picked) return;
+    setIsDispatching(true);
+    // Simulate Google Calendar API latency
+    setTimeout(() => {
+      setIsDispatching(false);
+      const slot = meetingSlots.find((s) => s.id === picked)!;
+      const eventId = `GCAL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      // Update the chat thread
+      onSendMeeting(slot, eventId);
+      // Show toast, then navigate to thread after 1 second
+      setShowToast(true);
+      setTimeout(() => {
+        onNavigateToThread();
+      }, 1000);
+    }, 1500);
+  };
 
   return (
-    <div className="flex flex-col h-full" style={{ background: "var(--background)" }}>
+    <div className="flex flex-col h-full relative" style={{ background: "var(--background)" }}>
+
+      {/* ── 1-second green success toast overlay ── */}
+      {showToast && (
+        <div
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 pointer-events-none"
+          style={{ background: "rgba(236,253,245,0.97)", backdropFilter: "blur(4px)" }}
+        >
+          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#D1FAE5", border: "2px solid #6EE7B7" }}>
+            <CheckCircle2 size={28} color="#059669" strokeWidth={2.5} />
+          </div>
+          <div className="text-center">
+            <p style={{ fontSize: 15, fontWeight: 700, color: "#065F46" }}>Invite Sent!</p>
+            <p style={{ fontSize: 11, color: "#047857", marginTop: 4 }}>Google Calendar invite dispatched successfully.</p>
+            <p style={{ fontSize: 10, color: "#6EE7B7", marginTop: 6, fontFamily: "var(--font-mono)" }}>Returning to chat…</p>
+          </div>
+        </div>
+      )}
+
       <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
         <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Schedule a Meeting</h3>
         <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>With {conv.candidateName} · {conv.role}</p>
@@ -205,6 +251,7 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
               <button
                 key={t}
                 onClick={() => setMeetingType(t)}
+                disabled={isDispatching}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-2 flex-1 justify-center transition-colors"
                 style={{
                   background: meetingType === t ? "var(--primary)" : "var(--secondary)",
@@ -231,7 +278,8 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
               return (
                 <button
                   key={slot.id}
-                  onClick={() => setPicked(slot.id)}
+                  onClick={() => { if (!isDispatching) setPicked(slot.id); }}
+                  disabled={isDispatching}
                   className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all"
                   style={{
                     background: active ? "rgba(194,98,42,0.06)" : "var(--card)",
@@ -239,7 +287,9 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
                   }}
                 >
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: active ? "rgba(194,98,42,0.10)" : "var(--accent)" }}>
-                    {slot.type === "video" ? <Video size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} /> : <MapPin size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} />}
+                    {slot.type === "video"
+                      ? <Video size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} />
+                      : <MapPin size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} />}
                   </div>
                   <div className="flex-1">
                     <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>{slot.label}</p>
@@ -253,34 +303,30 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
             })}
           </div>
         </section>
-
-        {/* Custom slot */}
-        <section>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--font-mono)", marginBottom: 8 }}>
-            Propose Custom Time
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg px-3 py-2.5" style={{ border: "1px solid var(--border)", background: "var(--card)" }}>
-              <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginBottom: 4 }}>DATE</p>
-              <input type="date" className="w-full bg-transparent outline-none" style={{ fontSize: 12, color: "var(--foreground)" }} />
-            </div>
-            <div className="rounded-lg px-3 py-2.5" style={{ border: "1px solid var(--border)", background: "var(--card)" }}>
-              <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginBottom: 4 }}>TIME</p>
-              <input type="time" className="w-full bg-transparent outline-none" style={{ fontSize: 12, color: "var(--foreground)" }} />
-            </div>
-          </div>
-        </section>
       </div>
 
       <div className="px-5 py-4 shrink-0" style={{ borderTop: "1px solid var(--border)", background: "var(--card)" }}>
         <button
-          onClick={() => { if (picked) onSendMeeting(meetingSlots.find((s) => s.id === picked)!); }}
-          className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 transition-opacity"
-          style={{ background: "var(--primary)", color: "#fff", fontSize: 13, fontWeight: 500, opacity: picked ? 1 : 0.45 }}
-          disabled={!picked}
+          onClick={handleDispatch}
+          disabled={!picked || isDispatching}
+          className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 transition-all"
+          style={{
+            background: "var(--primary)",
+            color: "#fff",
+            fontSize: 13,
+            fontWeight: 500,
+            opacity: picked && !isDispatching ? 1 : 0.45,
+            cursor: picked && !isDispatching ? "pointer" : "not-allowed",
+          }}
         >
-          <Calendar size={14} strokeWidth={2} />
-          Send Meeting Invite
+          {isDispatching ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin"><Sparkles size={14} /></span>
+              Dispatching to Google Calendar...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> Send Meeting Invite</span>
+          )}
         </button>
       </div>
     </div>
@@ -564,15 +610,21 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
     }, 900);
   };
 
-  const sendMeeting = (slot: MeetingSlot) => {
+  const sendMeeting = (slot: MeetingSlot, eventId: string) => {
     const msg: ChatMsg = {
       id: `meet${Date.now()}`, role: "employer",
-      text: `I'd like to schedule a ${slot.label} on ${slot.date} at ${slot.time}. Does that work for you?`,
+      text: `I've sent a calendar invite for our ${slot.label} on ${slot.date} at ${slot.time}. Looking forward to it!`,
       time: "Just now",
-      attachment: { type: "meeting", label: `📅 ${slot.label} · ${slot.date} at ${slot.time}` },
+      attachment: { type: "meeting", label: `📅 ${slot.label} · Google Calendar: ${eventId}` },
     };
+    const sysMsg: ChatMsg = {
+      id: `sys${Date.now()}`, role: "system",
+      text: `Meeting confirmed. AI Summary Brief automatically attached to Calendar Event ${eventId}.`,
+      time: "Just now",
+    };
+    
     setConversations((prev) =>
-      prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, msg], lastMsg: `Meeting invite: ${slot.label}`, lastTime: "Just now" } : c)
+      prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, msg, sysMsg], lastMsg: `Meeting invite: ${slot.label}`, lastTime: "Just now" } : c)
     );
     setPanel("thread");
   };
@@ -688,7 +740,11 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
             />
           )}
           {panel === "schedule" && (
-            <SchedulePanel conv={activeConv} onSendMeeting={sendMeeting} />
+            <SchedulePanel
+              conv={activeConv}
+              onSendMeeting={sendMeeting}
+              onNavigateToThread={() => setPanel("thread")}
+            />
           )}
           {panel === "hiring" && (
             <HiringPanel conv={activeConv} onStageChange={changeStage} />
