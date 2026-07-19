@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, MapPin, Zap, TrendingUp, Clock, Users, Briefcase, ArrowUpRight } from "lucide-react";
+import { ChevronRight, MapPin, Zap, TrendingUp, Clock, Users, Briefcase, ArrowUpRight, X, Plus, CheckCircle2 } from "lucide-react";
 
 type RoleTab = "foundation" | "signal";
 
@@ -22,7 +22,7 @@ interface Role {
   salary: string;
 }
 
-const roles: Role[] = [
+const initialRoles: Role[] = [
   {
     id: "r1",
     title: "Senior Data Infrastructure Engineer",
@@ -165,9 +165,59 @@ function SignalTab({ role }: { role: Role }) {
   );
 }
 
+interface EditDraft {
+  title: string;
+  salary: string;
+  location: string;
+  requirements: string[];
+  newReq: string;
+}
+
 export function OpenRolesView() {
+  const [roles, setRoles] = useState<Role[]>(initialRoles);
   const [selectedRole, setSelectedRole] = useState<Role>(roles[0]);
   const [roleTab, setRoleTab] = useState<RoleTab>("signal");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editDraft, setEditDraft] = useState<EditDraft>({
+    title: "",
+    salary: "",
+    location: "",
+    requirements: [],
+    newReq: "",
+  });
+
+  const openEdit = () => {
+    setEditDraft({
+      title: selectedRole.title,
+      salary: selectedRole.salary,
+      location: selectedRole.location,
+      requirements: [...selectedRole.requirements],
+      newReq: "",
+    });
+    setEditOpen(true);
+  };
+
+  const saveEdit = () => {
+    const updated = {
+      ...selectedRole,
+      title: editDraft.title,
+      salary: editDraft.salary,
+      location: editDraft.location,
+      requirements: editDraft.requirements,
+    };
+    setRoles((prev) => prev.map((r) => r.id === selectedRole.id ? updated : r));
+    setSelectedRole(updated);
+    setEditOpen(false);
+  };
+
+  const removeReq = (index: number) => {
+    setEditDraft((d) => ({ ...d, requirements: d.requirements.filter((_, i) => i !== index) }));
+  };
+
+  const addReq = () => {
+    if (!editDraft.newReq.trim()) return;
+    setEditDraft((d) => ({ ...d, requirements: [...d.requirements, d.newReq.trim()], newReq: "" }));
+  };
 
   return (
     <div className="flex h-full overflow-hidden" style={{ fontFamily: "var(--font-sans)" }}>
@@ -183,7 +233,7 @@ export function OpenRolesView() {
             return (
               <button
                 key={role.id}
-                onClick={() => setSelectedRole(role)}
+                onClick={() => { setSelectedRole(role); setEditOpen(false); }}
                 className="w-full text-left px-4 py-3.5 transition-colors"
                 style={{
                   borderBottom: "1px solid var(--border)",
@@ -213,34 +263,103 @@ export function OpenRolesView() {
               <h2 style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em", lineHeight: 1.3 }}>{selectedRole.title}</h2>
               <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>{selectedRole.team} · {selectedRole.location}</p>
             </div>
-            <button className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 shrink-0" style={{ background: "var(--primary)", fontSize: 11, color: "#fff", fontWeight: 500 }}>
-              Edit Role
-              <ArrowUpRight size={10} strokeWidth={2.5} />
+            <button
+              onClick={openEdit}
+              className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 shrink-0 transition-colors hover:opacity-90"
+              style={{ background: editOpen ? "var(--secondary)" : "var(--primary)", fontSize: 11, color: editOpen ? "var(--foreground)" : "#fff", fontWeight: 500, border: editOpen ? "1px solid var(--border)" : "none" }}
+            >
+              {editOpen ? "Cancel" : "Edit Role"}
+              {!editOpen && <ArrowUpRight size={10} strokeWidth={2.5} />}
             </button>
           </div>
 
           {/* Sub-tabs */}
-          <div className="flex gap-1 mt-3">
-            {([["signal", "Dynamic Demand Signal"], ["foundation", "Foundation"]] as [RoleTab, string][]).map(([id, label]) => (
-              <button
-                key={id}
-                onClick={() => setRoleTab(id)}
-                className="rounded-md px-3 py-1.5 transition-colors"
-                style={{
-                  fontSize: 11,
-                  fontWeight: roleTab === id ? 600 : 400,
-                  background: roleTab === id ? "var(--primary)" : "var(--secondary)",
-                  color: roleTab === id ? "#fff" : "var(--muted-foreground)",
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {!editOpen && (
+            <div className="flex gap-1 mt-3">
+              {([["signal", "Dynamic Demand Signal"], ["foundation", "Foundation"]] as [RoleTab, string][]).map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setRoleTab(id)}
+                  className="rounded-md px-3 py-1.5 transition-colors"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: roleTab === id ? 600 : 400,
+                    background: roleTab === id ? "var(--primary)" : "var(--secondary)",
+                    color: roleTab === id ? "#fff" : "var(--muted-foreground)",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4" style={{ scrollbarWidth: "none" }}>
-          {roleTab === "foundation" ? <FoundationTab role={selectedRole} /> : <SignalTab role={selectedRole} />}
+          {editOpen ? (
+            /* ── Edit Drawer ── */
+            <div className="space-y-4">
+              <p style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
+                Editing Role
+              </p>
+
+              {[
+                { label: "Title", key: "title" as const },
+                { label: "Salary Range", key: "salary" as const },
+                { label: "Location", key: "location" as const },
+              ].map(({ label, key }) => (
+                <div key={key}>
+                  <label style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 4 }}>{label}</label>
+                  <input
+                    value={editDraft[key]}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, [key]: e.target.value }))}
+                    className="w-full rounded-lg px-3 outline-none"
+                    style={{ background: "var(--card)", border: "1px solid var(--border)", height: 36, fontSize: 12, color: "var(--foreground)" }}
+                  />
+                </div>
+              ))}
+
+              {/* Requirements editor */}
+              <div>
+                <label style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 4 }}>Requirements</label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {editDraft.requirements.map((req, i) => (
+                    <span key={i} className="flex items-center gap-1 rounded-md px-2.5 py-1" style={{ fontSize: 11, background: "var(--secondary)", color: "var(--foreground)", border: "1px solid var(--border)" }}>
+                      {req}
+                      <button onClick={() => removeReq(i)} className="ml-1 hover:text-red-500 transition-colors">
+                        <X size={9} strokeWidth={2.5} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    value={editDraft.newReq}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, newReq: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === "Enter") addReq(); }}
+                    placeholder="Add requirement…"
+                    className="flex-1 rounded-lg px-3 outline-none"
+                    style={{ background: "var(--card)", border: "1px solid var(--border)", height: 32, fontSize: 11, color: "var(--foreground)" }}
+                  />
+                  <button onClick={addReq} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--primary)" }}>
+                    <Plus size={12} color="#fff" strokeWidth={2.5} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Save */}
+              <button
+                onClick={saveEdit}
+                className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 transition-all hover:opacity-90"
+                style={{ background: "var(--primary)", color: "#fff", fontSize: 13, fontWeight: 500 }}
+              >
+                <CheckCircle2 size={14} strokeWidth={2} />
+                Save Changes
+              </button>
+            </div>
+          ) : (
+            roleTab === "foundation" ? <FoundationTab role={selectedRole} /> : <SignalTab role={selectedRole} />
+          )}
         </div>
       </div>
     </div>

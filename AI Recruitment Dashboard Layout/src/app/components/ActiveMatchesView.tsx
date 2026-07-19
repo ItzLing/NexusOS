@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, Zap, CheckCircle2, ChevronRight, ArrowUpRight, Filter } from "lucide-react";
+import { TrendingUp, Zap, CheckCircle2, ArrowUpRight, Filter, X } from "lucide-react";
 
 interface Match {
   id: string;
@@ -20,7 +20,7 @@ interface Match {
   status: "new" | "reviewing" | "introduced";
 }
 
-const matches: Match[] = [
+const initialMatches: Match[] = [
   {
     id: "m1",
     candidateInitials: "JP",
@@ -101,12 +101,42 @@ const statusConfig = {
   introduced: { label: "Introduced", color: "#065F46", bg: "#ECFDF5" },
 };
 
-export function ActiveMatchesView() {
-  const [selected, setSelected] = useState<Match>(matches[0]);
+interface Props {
+  onFastTrack?: (candidateName: string) => void;
+}
+
+export function ActiveMatchesView({ onFastTrack }: Props) {
+  const [matchData, setMatchData] = useState<Match[]>(initialMatches);
+  const [selected, setSelected] = useState<Match>(matchData[0]);
   const [filterPhase, setFilterPhase] = useState<string>("All");
+  const [filterStatus, setFilterStatus] = useState<string>("All");
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const phases = ["All", "Ready for Pivot", "Accelerating", "Exploring"];
-  const filtered = filterPhase === "All" ? matches : matches.filter((m) => m.phase === filterPhase);
+  const statusOptions: Array<"All" | "new" | "reviewing" | "introduced"> = ["All", "new", "reviewing", "introduced"];
+
+  const filtered = matchData
+    .filter((m) => filterPhase === "All" || m.phase === filterPhase)
+    .filter((m) => filterStatus === "All" || m.status === filterStatus);
+
+  const updateMatchStatus = (id: string, status: Match["status"]) => {
+    setMatchData((prev) => prev.map((m) => m.id === id ? { ...m, status } : m));
+    setSelected((prev) => prev.id === id ? { ...prev, status } : prev);
+  };
+
+  const handleFastTrack = () => {
+    onFastTrack?.(selected.candidateName);
+    updateMatchStatus(selected.id, "introduced");
+  };
+
+  const handleViewProfile = () => {
+    if (selected.status === "new") {
+      updateMatchStatus(selected.id, "reviewing");
+    }
+  };
+
+  // Keep selected in sync with matchData
+  const liveSelected = matchData.find((m) => m.id === selected.id) ?? selected;
 
   return (
     <div className="flex h-full overflow-hidden" style={{ fontFamily: "var(--font-sans)" }}>
@@ -119,11 +149,49 @@ export function ActiveMatchesView() {
               <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>Active Matches</h3>
               <p style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 1 }}>{filtered.length} live pairings</p>
             </div>
-            <button className="flex items-center gap-1 rounded-md px-2 py-1" style={{ border: "1px solid var(--border)", fontSize: 10, color: "var(--muted-foreground)" }}>
-              <Filter size={9} strokeWidth={2} />
-              Filter
+            <button
+              onClick={() => setFilterOpen((p) => !p)}
+              className="flex items-center gap-1 rounded-md px-2 py-1 transition-colors"
+              style={{
+                border: `1px solid ${filterOpen ? "var(--primary)" : "var(--border)"}`,
+                fontSize: 10,
+                color: filterOpen ? "var(--primary)" : "var(--muted-foreground)",
+                background: filterOpen ? "rgba(194,98,42,0.06)" : "transparent",
+              }}
+            >
+              {filterOpen ? <X size={9} strokeWidth={2.5} /> : <Filter size={9} strokeWidth={2} />}
+              {filterOpen ? "Close" : "Filter"}
             </button>
           </div>
+
+          {/* Status filter row (toggle) */}
+          {filterOpen && (
+            <div className="mb-2.5 p-2 rounded-lg" style={{ background: "var(--background)", border: "1px solid var(--border)" }}>
+              <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Status</p>
+              <div className="flex gap-1 flex-wrap">
+                {statusOptions.map((s) => {
+                  const cfg = s === "All" ? null : statusConfig[s];
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => setFilterStatus(s)}
+                      className="rounded-full px-2.5 py-0.5 transition-colors"
+                      style={{
+                        fontSize: 9,
+                        fontWeight: filterStatus === s ? 600 : 400,
+                        background: filterStatus === s ? (cfg?.bg ?? "var(--primary)") : "var(--secondary)",
+                        color: filterStatus === s ? (cfg?.color ?? "#fff") : "var(--muted-foreground)",
+                        border: filterStatus === s ? `1px solid ${cfg?.color ?? "var(--primary)"}` : "1px solid var(--border)",
+                      }}
+                    >
+                      {s === "All" ? "All" : cfg!.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Phase pills */}
           <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
             {phases.map((p) => (
@@ -146,8 +214,13 @@ export function ActiveMatchesView() {
         </div>
 
         <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-          {filtered.map((match) => {
-            const active = match.id === selected.id;
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 gap-2">
+              <Filter size={18} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.5} />
+              <p style={{ fontSize: 11, color: "var(--muted-foreground)" }}>No matches for current filters</p>
+            </div>
+          ) : filtered.map((match) => {
+            const active = match.id === liveSelected.id;
             const status = statusConfig[match.status];
             return (
               <button
@@ -189,25 +262,28 @@ export function ActiveMatchesView() {
         {/* Header */}
         <div className="px-5 py-4 shrink-0" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-white" style={{ background: selected.candidateAvatarBg, fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600 }}>
-              {selected.candidateInitials}
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-white" style={{ background: liveSelected.candidateAvatarBg, fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600 }}>
+              {liveSelected.candidateInitials}
             </div>
             <div className="flex-1">
-              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{selected.candidateName}</p>
-              <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{selected.candidateCurrentTitle}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{liveSelected.candidateName}</p>
+              <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{liveSelected.candidateCurrentTitle}</p>
             </div>
             <div className="text-right">
-              <p style={{ fontSize: 16, fontWeight: 800, color: "var(--primary)", fontFamily: "var(--font-mono)" }}>{selected.trajectoryScore}%</p>
+              <p style={{ fontSize: 16, fontWeight: 800, color: "var(--primary)", fontFamily: "var(--font-mono)" }}>{liveSelected.trajectoryScore}%</p>
               <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>Trajectory Match</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 mt-3">
-            <span className="rounded px-2 py-0.5" style={{ fontSize: 10, background: selected.phaseBg, color: selected.phaseColor, fontWeight: 500 }}>
-              Phase: {selected.phase}
+            <span className="rounded px-2 py-0.5" style={{ fontSize: 10, background: liveSelected.phaseBg, color: liveSelected.phaseColor, fontWeight: 500 }}>
+              Phase: {liveSelected.phase}
             </span>
             <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>→</span>
-            <span style={{ fontSize: 10, color: "var(--muted-foreground)" }}>{selected.roleTitle}</span>
+            <span style={{ fontSize: 10, color: "var(--muted-foreground)" }}>{liveSelected.roleTitle}</span>
+            <span className="ml-auto rounded px-2 py-0.5" style={{ fontSize: 9, fontWeight: 600, background: statusConfig[liveSelected.status].bg, color: statusConfig[liveSelected.status].color }}>
+              {statusConfig[liveSelected.status].label}
+            </span>
           </div>
         </div>
 
@@ -216,7 +292,7 @@ export function ActiveMatchesView() {
           <div className="rounded-lg p-3 flex items-center gap-2.5" style={{ background: "rgba(194,98,42,0.05)", border: "1px solid rgba(194,98,42,0.15)" }}>
             <TrendingUp size={13} style={{ color: "var(--primary)" }} strokeWidth={2.2} />
             <p style={{ fontSize: 12, color: "var(--foreground)", lineHeight: 1.5 }}>
-              <span style={{ fontWeight: 600 }}>Momentum: </span>{selected.momentumSignal}
+              <span style={{ fontWeight: 600 }}>Momentum: </span>{liveSelected.momentumSignal}
             </p>
           </div>
 
@@ -226,7 +302,7 @@ export function ActiveMatchesView() {
               Why This Pairing
             </p>
             <div className="rounded-lg p-4" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-              <p style={{ fontSize: 12, color: "var(--foreground)", lineHeight: 1.65 }}>{selected.aiRationale}</p>
+              <p style={{ fontSize: 12, color: "var(--foreground)", lineHeight: 1.65 }}>{liveSelected.aiRationale}</p>
             </div>
           </section>
 
@@ -236,7 +312,7 @@ export function ActiveMatchesView() {
               Trajectory Overlap
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {selected.sharedSkills.map((s) => (
+              {liveSelected.sharedSkills.map((s) => (
                 <span key={s} className="flex items-center gap-1 rounded px-2.5 py-1" style={{ fontSize: 11, background: "#ECFDF5", color: "#065F46", border: "1px solid rgba(45,106,79,0.2)" }}>
                   <CheckCircle2 size={9} style={{ color: "#059669" }} strokeWidth={2.5} />
                   {s}
@@ -247,13 +323,37 @@ export function ActiveMatchesView() {
 
           {/* Actions */}
           <div className="flex gap-2 pt-1">
-            <button className="flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2.5" style={{ background: "var(--primary)", fontSize: 12, fontWeight: 500, color: "#fff" }}>
-              <Zap size={12} strokeWidth={2.5} />
-              Fast-track Introduction
+            <button
+              onClick={handleFastTrack}
+              disabled={liveSelected.status === "introduced"}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2.5 transition-all"
+              style={{
+                background: liveSelected.status === "introduced" ? "#ECFDF5" : "var(--primary)",
+                fontSize: 12,
+                fontWeight: 500,
+                color: liveSelected.status === "introduced" ? "#065F46" : "#fff",
+                border: liveSelected.status === "introduced" ? "1px solid #A7F3D0" : "none",
+                cursor: liveSelected.status === "introduced" ? "default" : "pointer",
+              }}
+            >
+              {liveSelected.status === "introduced" ? (
+                <><CheckCircle2 size={12} strokeWidth={2.5} /> Introduced</>
+              ) : (
+                <><Zap size={12} strokeWidth={2.5} /> Fast-track Introduction</>
+              )}
             </button>
-            <button className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5" style={{ background: "var(--secondary)", border: "1px solid var(--border)", fontSize: 12, color: "var(--muted-foreground)" }}>
+            <button
+              onClick={handleViewProfile}
+              className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent"
+              style={{
+                background: liveSelected.status === "reviewing" ? "rgba(29,78,137,0.08)" : "var(--secondary)",
+                border: `1px solid ${liveSelected.status === "reviewing" ? "#93C5FD" : "var(--border)"}`,
+                fontSize: 12,
+                color: liveSelected.status === "reviewing" ? "#1D4E89" : "var(--muted-foreground)",
+              }}
+            >
               <ArrowUpRight size={12} strokeWidth={2} />
-              View Profile
+              {liveSelected.status === "reviewing" ? "In Review" : "View Profile"}
             </button>
           </div>
         </div>

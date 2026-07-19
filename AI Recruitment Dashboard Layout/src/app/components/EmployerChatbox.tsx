@@ -334,9 +334,10 @@ function SchedulePanel({
 }
 
 /* Hiring & Onboarding panel */
-function HiringPanel({ conv, onStageChange }: { conv: Conversation; onStageChange: (s: HiringStage) => void }) {
+function HiringPanel({ conv, onStageChange, onSendOffer }: { conv: Conversation; onStageChange: (s: HiringStage) => void; onSendOffer: () => void }) {
   const [tasks, setTasks] = useState<OnboardingTask[]>(onboardingTasks);
   const [showOffer, setShowOffer] = useState(false);
+  const [offerSent, setOfferSent] = useState(false);
 
   const toggleTask = (id: string) =>
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
@@ -393,9 +394,13 @@ function HiringPanel({ conv, onStageChange }: { conv: Conversation; onStageChang
                     <span style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)", fontFamily: label === "Base Salary" || label === "Equity" ? "var(--font-mono)" : "inherit" }}>{value}</span>
                   </div>
                 ))}
-                <button className="w-full flex items-center justify-center gap-2 rounded-lg py-2 mt-2" style={{ background: "var(--primary)", fontSize: 12, fontWeight: 500, color: "#fff" }}>
-                  <Send size={12} strokeWidth={2} />
-                  Send Offer to Candidate
+                <button
+                  onClick={() => { setOfferSent(true); onStageChange("offer"); onSendOffer(); }}
+                  disabled={offerSent}
+                  className="w-full flex items-center justify-center gap-2 rounded-lg py-2 mt-2 transition-all"
+                  style={{ background: offerSent ? "#ECFDF5" : "var(--primary)", fontSize: 12, fontWeight: 500, color: offerSent ? "#065F46" : "#fff", border: offerSent ? "1px solid #A7F3D0" : "none", cursor: offerSent ? "default" : "pointer" }}
+                >
+                  {offerSent ? <><CheckCircle2 size={12} strokeWidth={2.5} /> Offer Sent ✓</> : <><Send size={12} strokeWidth={2} /> Send Offer to Candidate</>}
                 </button>
               </div>
             )}
@@ -465,6 +470,15 @@ function ThreadView({
   onSchedule: () => void;
   onHiring: () => void;
 }) {
+  const handleShortcut = (label: string) => {
+    if (label === "Schedule an intro call") { onSchedule(); return; }
+    const contextual: Record<string, string> = {
+      "Draft a follow-up": `Hi ${conv.candidateName}, just following up on our earlier conversation! Wanted to check if you had any questions about the role or the team — and to see if there's anything I can share to help you think it through. Looking forward to connecting.`,
+      "Suggest an opener": `Hi ${conv.candidateName}, your profile and career trajectory genuinely stood out to us — especially the direction your work has been heading recently. I think there's a meaningful fit with something we're building. Would you be open to a 20-minute call this week?`,
+      "What's their strongest signal?": `[AI Insight] ${conv.candidateName}'s strongest trajectory signal is their consistent velocity acceleration — their recent work shows deliberate scope expansion that maps directly to where this role is heading over the next 12 months. Recommend prioritising this candidate.`,
+    };
+    onSend(contextual[label] || label);
+  };
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -538,7 +552,7 @@ function ThreadView({
       <div className="px-4 pt-2 pb-1.5 shrink-0" style={{ borderTop: "1px solid var(--border)", background: "var(--card)" }}>
         <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
           {shortcuts.map((s) => (
-            <button key={s} onClick={() => onSend(s)}
+            <button key={s} onClick={() => handleShortcut(s)}
               className="rounded-full px-3 py-1.5 shrink-0 transition-colors hover:bg-accent"
               style={{ background: "var(--secondary)", border: "1px solid var(--border)", fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, whiteSpace: "nowrap" }}>
               {s}
@@ -593,6 +607,9 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
   );
   const [panel, setPanel] = useState<PanelView>("thread");
   const [search, setSearch] = useState("");
+  const [showNewConvModal, setShowNewConvModal] = useState(false);
+  const [newConvName, setNewConvName] = useState("");
+  const [newConvRole, setNewConvRole] = useState("");
 
   const activeConv = conversations.find((c) => c.id === activeConvId)!;
 
@@ -608,6 +625,43 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
         prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, reply] } : c)
       );
     }, 900);
+  };
+
+  const handleCreateConv = () => {
+    if (!newConvName.trim()) return;
+    const initials = newConvName.trim().split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+    const bgPool = ["#4A5568", "#7C5C4A", "#4A6741", "#6B4F6B", "#7A4545"];
+    const bg = bgPool[Math.floor(Math.random() * bgPool.length)];
+    const newConv = makeConversation(
+      `new${Date.now()}`, newConvName.trim(), initials, bg,
+      newConvRole.trim() || "Prospective Candidate", "shortlisted", 0
+    );
+    setConversations((prev) => [newConv, ...prev]);
+    setActiveConvId(newConv.id);
+    setPanel("thread");
+    setShowNewConvModal(false);
+    setNewConvName("");
+    setNewConvRole("");
+  };
+
+  const sendOffer = () => {
+    const offerMsg: ChatMsg = {
+      id: `off${Date.now()}`, role: "employer",
+      text: `Hi ${activeConv.candidateName}, we'd like to formally extend an offer for the ${activeConv.role} position. Please find the offer details attached — feel free to reach out with any questions!`,
+      time: "Just now",
+      attachment: { type: "offer", label: `📋 Offer Letter — ${activeConv.role}` },
+    };
+    const sysMsg: ChatMsg = {
+      id: `sys${Date.now()}`, role: "system",
+      text: `Offer letter sent to ${activeConv.candidateName}. Stage automatically updated to Offer Sent.`,
+      time: "Just now",
+    };
+    setConversations((prev) =>
+      prev.map((c) => c.id === activeConvId
+        ? { ...c, stage: "offer", messages: [...c.messages, offerMsg, sysMsg], lastMsg: "Offer letter sent", lastTime: "Just now" }
+        : c)
+    );
+    setPanel("thread");
   };
 
   const sendMeeting = (slot: MeetingSlot, eventId: string) => {
@@ -651,7 +705,11 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
             <MessageSquareMore size={14} style={{ color: "var(--primary)" }} strokeWidth={2} />
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Introductions</span>
           </div>
-          <button className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-accent transition-colors" style={{ border: "1px solid var(--border)" }}>
+          <button
+            onClick={() => setShowNewConvModal(true)}
+            className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-accent transition-colors"
+            style={{ border: "1px solid var(--border)" }}
+          >
             <Plus size={12} style={{ color: "var(--muted-foreground)" }} strokeWidth={2.5} />
           </button>
         </div>
@@ -747,10 +805,70 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
             />
           )}
           {panel === "hiring" && (
-            <HiringPanel conv={activeConv} onStageChange={changeStage} />
+            <HiringPanel conv={activeConv} onStageChange={changeStage} onSendOffer={sendOffer} />
           )}
         </div>
       </div>
+
+      {/* ── New Conversation Modal ── */}
+      {showNewConvModal && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(3px)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowNewConvModal(false); }}
+        >
+          <div className="rounded-2xl p-5 w-80" style={{ background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.18)" }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)" }}>New Introduction</h3>
+              <button onClick={() => setShowNewConvModal(false)} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-accent">
+                <X size={12} style={{ color: "var(--muted-foreground)" }} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 4 }}>Candidate Name *</label>
+                <input
+                  autoFocus
+                  value={newConvName}
+                  onChange={(e) => setNewConvName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleCreateConv(); }}
+                  placeholder="e.g. Alex Rivera"
+                  className="w-full rounded-lg px-3 outline-none"
+                  style={{ background: "var(--input-background)", border: "1px solid var(--border)", height: 36, fontSize: 12, color: "var(--foreground)" }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 4 }}>Role (optional)</label>
+                <input
+                  value={newConvRole}
+                  onChange={(e) => setNewConvRole(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleCreateConv(); }}
+                  placeholder="e.g. Senior Engineer"
+                  className="w-full rounded-lg px-3 outline-none"
+                  style={{ background: "var(--input-background)", border: "1px solid var(--border)", height: 36, fontSize: 12, color: "var(--foreground)" }}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setShowNewConvModal(false)}
+                className="flex-1 rounded-lg py-2 transition-colors hover:bg-accent"
+                style={{ fontSize: 12, color: "var(--muted-foreground)", border: "1px solid var(--border)", background: "var(--secondary)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateConv}
+                disabled={!newConvName.trim()}
+                className="flex-1 rounded-lg py-2 transition-all"
+                style={{ fontSize: 12, fontWeight: 600, background: newConvName.trim() ? "var(--primary)" : "var(--muted)", color: "#fff", opacity: newConvName.trim() ? 1 : 0.45 }}
+              >
+                Start Conversation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
