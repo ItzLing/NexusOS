@@ -627,7 +627,7 @@ function EmployerDiscovery() {
 }
 
 /* ─── Navigator Tab ─── */
-function NavigatorTab() {
+export function NavigatorTab() {
   const [expandedRoute, setExpandedRoute] = useState<string | null>("pred-1");
   const [coachDismissed, setCoachDismissed] = useState(false);
 
@@ -767,7 +767,7 @@ function NavigatorTab() {
 }
 
 /* ─── Portfolio Tab ─── */
-function PortfolioTab() {
+export function PortfolioTab() {
   const [selected, setSelected] = useState<PortfolioSample | null>(null);
 
   return (
@@ -833,7 +833,7 @@ function PortfolioTab() {
 }
 
 /* ─── Coach Tab ─── */
-function CoachTab() {
+export function CoachTab() {
   const [messages, setMessages] = useState<ChatMsg[]>(initialMessages);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -935,7 +935,7 @@ function CoachTab() {
 }
 
 /* ─── Pay Tab ─── */
-function PayTab() {
+export function PayTab() {
   return (
     <div className="px-5 pt-5 flex flex-col gap-4">
       <div>

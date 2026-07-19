@@ -183,12 +183,58 @@ function StageTrack({ stage, onChange }: { stage: HiringStage; onChange: (s: Hir
 }
 
 /* Schedule panel */
-function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeeting: (slot: MeetingSlot) => void }) {
+function SchedulePanel({
+  conv,
+  onSendMeeting,
+  onNavigateToThread,
+}: {
+  conv: Conversation;
+  onSendMeeting: (slot: MeetingSlot, eventId: string) => void;
+  onNavigateToThread: () => void;
+}) {
   const [picked, setPicked] = useState<string | null>(null);
   const [meetingType, setMeetingType] = useState<"video" | "in-person">("video");
+  const [isDispatching, setIsDispatching] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const handleDispatch = () => {
+    if (!picked) return;
+    setIsDispatching(true);
+    // Simulate Google Calendar API latency
+    setTimeout(() => {
+      setIsDispatching(false);
+      const slot = meetingSlots.find((s) => s.id === picked)!;
+      const eventId = `GCAL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      // Update the chat thread
+      onSendMeeting(slot, eventId);
+      // Show toast, then navigate to thread after 1 second
+      setShowToast(true);
+      setTimeout(() => {
+        onNavigateToThread();
+      }, 1000);
+    }, 1500);
+  };
 
   return (
-    <div className="flex flex-col h-full" style={{ background: "var(--background)" }}>
+    <div className="flex flex-col h-full relative" style={{ background: "var(--background)" }}>
+
+      {/* ── 1-second green success toast overlay ── */}
+      {showToast && (
+        <div
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 pointer-events-none"
+          style={{ background: "rgba(236,253,245,0.97)", backdropFilter: "blur(4px)" }}
+        >
+          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#D1FAE5", border: "2px solid #6EE7B7" }}>
+            <CheckCircle2 size={28} color="#059669" strokeWidth={2.5} />
+          </div>
+          <div className="text-center">
+            <p style={{ fontSize: 15, fontWeight: 700, color: "#065F46" }}>Invite Sent!</p>
+            <p style={{ fontSize: 11, color: "#047857", marginTop: 4 }}>Google Calendar invite dispatched successfully.</p>
+            <p style={{ fontSize: 10, color: "#6EE7B7", marginTop: 6, fontFamily: "var(--font-mono)" }}>Returning to chat…</p>
+          </div>
+        </div>
+      )}
+
       <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
         <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Schedule a Meeting</h3>
         <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>With {conv.candidateName} · {conv.role}</p>
@@ -205,6 +251,7 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
               <button
                 key={t}
                 onClick={() => setMeetingType(t)}
+                disabled={isDispatching}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-2 flex-1 justify-center transition-colors"
                 style={{
                   background: meetingType === t ? "var(--primary)" : "var(--secondary)",
@@ -231,7 +278,8 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
               return (
                 <button
                   key={slot.id}
-                  onClick={() => setPicked(slot.id)}
+                  onClick={() => { if (!isDispatching) setPicked(slot.id); }}
+                  disabled={isDispatching}
                   className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all"
                   style={{
                     background: active ? "rgba(194,98,42,0.06)" : "var(--card)",
@@ -239,7 +287,9 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
                   }}
                 >
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: active ? "rgba(194,98,42,0.10)" : "var(--accent)" }}>
-                    {slot.type === "video" ? <Video size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} /> : <MapPin size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} />}
+                    {slot.type === "video"
+                      ? <Video size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} />
+                      : <MapPin size={15} style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }} strokeWidth={1.8} />}
                   </div>
                   <div className="flex-1">
                     <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>{slot.label}</p>
@@ -253,34 +303,30 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
             })}
           </div>
         </section>
-
-        {/* Custom slot */}
-        <section>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--font-mono)", marginBottom: 8 }}>
-            Propose Custom Time
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg px-3 py-2.5" style={{ border: "1px solid var(--border)", background: "var(--card)" }}>
-              <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginBottom: 4 }}>DATE</p>
-              <input type="date" className="w-full bg-transparent outline-none" style={{ fontSize: 12, color: "var(--foreground)" }} />
-            </div>
-            <div className="rounded-lg px-3 py-2.5" style={{ border: "1px solid var(--border)", background: "var(--card)" }}>
-              <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginBottom: 4 }}>TIME</p>
-              <input type="time" className="w-full bg-transparent outline-none" style={{ fontSize: 12, color: "var(--foreground)" }} />
-            </div>
-          </div>
-        </section>
       </div>
 
       <div className="px-5 py-4 shrink-0" style={{ borderTop: "1px solid var(--border)", background: "var(--card)" }}>
         <button
-          onClick={() => { if (picked) onSendMeeting(meetingSlots.find((s) => s.id === picked)!); }}
-          className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 transition-opacity"
-          style={{ background: "var(--primary)", color: "#fff", fontSize: 13, fontWeight: 500, opacity: picked ? 1 : 0.45 }}
-          disabled={!picked}
+          onClick={handleDispatch}
+          disabled={!picked || isDispatching}
+          className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 transition-all"
+          style={{
+            background: "var(--primary)",
+            color: "#fff",
+            fontSize: 13,
+            fontWeight: 500,
+            opacity: picked && !isDispatching ? 1 : 0.45,
+            cursor: picked && !isDispatching ? "pointer" : "not-allowed",
+          }}
         >
-          <Calendar size={14} strokeWidth={2} />
-          Send Meeting Invite
+          {isDispatching ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin"><Sparkles size={14} /></span>
+              Dispatching to Google Calendar...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> Send Meeting Invite</span>
+          )}
         </button>
       </div>
     </div>
@@ -288,9 +334,10 @@ function SchedulePanel({ conv, onSendMeeting }: { conv: Conversation; onSendMeet
 }
 
 /* Hiring & Onboarding panel */
-function HiringPanel({ conv, onStageChange }: { conv: Conversation; onStageChange: (s: HiringStage) => void }) {
+function HiringPanel({ conv, onStageChange, onSendOffer }: { conv: Conversation; onStageChange: (s: HiringStage) => void; onSendOffer: () => void }) {
   const [tasks, setTasks] = useState<OnboardingTask[]>(onboardingTasks);
   const [showOffer, setShowOffer] = useState(false);
+  const [offerSent, setOfferSent] = useState(false);
 
   const toggleTask = (id: string) =>
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
@@ -347,9 +394,13 @@ function HiringPanel({ conv, onStageChange }: { conv: Conversation; onStageChang
                     <span style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)", fontFamily: label === "Base Salary" || label === "Equity" ? "var(--font-mono)" : "inherit" }}>{value}</span>
                   </div>
                 ))}
-                <button className="w-full flex items-center justify-center gap-2 rounded-lg py-2 mt-2" style={{ background: "var(--primary)", fontSize: 12, fontWeight: 500, color: "#fff" }}>
-                  <Send size={12} strokeWidth={2} />
-                  Send Offer to Candidate
+                <button
+                  onClick={() => { setOfferSent(true); onStageChange("offer"); onSendOffer(); }}
+                  disabled={offerSent}
+                  className="w-full flex items-center justify-center gap-2 rounded-lg py-2 mt-2 transition-all"
+                  style={{ background: offerSent ? "#ECFDF5" : "var(--primary)", fontSize: 12, fontWeight: 500, color: offerSent ? "#065F46" : "#fff", border: offerSent ? "1px solid #A7F3D0" : "none", cursor: offerSent ? "default" : "pointer" }}
+                >
+                  {offerSent ? <><CheckCircle2 size={12} strokeWidth={2.5} /> Offer Sent ✓</> : <><Send size={12} strokeWidth={2} /> Send Offer to Candidate</>}
                 </button>
               </div>
             )}
@@ -419,6 +470,15 @@ function ThreadView({
   onSchedule: () => void;
   onHiring: () => void;
 }) {
+  const handleShortcut = (label: string) => {
+    if (label === "Schedule an intro call") { onSchedule(); return; }
+    const contextual: Record<string, string> = {
+      "Draft a follow-up": `Hi ${conv.candidateName}, just following up on our earlier conversation! Wanted to check if you had any questions about the role or the team — and to see if there's anything I can share to help you think it through. Looking forward to connecting.`,
+      "Suggest an opener": `Hi ${conv.candidateName}, your profile and career trajectory genuinely stood out to us — especially the direction your work has been heading recently. I think there's a meaningful fit with something we're building. Would you be open to a 20-minute call this week?`,
+      "What's their strongest signal?": `[AI Insight] ${conv.candidateName}'s strongest trajectory signal is their consistent velocity acceleration — their recent work shows deliberate scope expansion that maps directly to where this role is heading over the next 12 months. Recommend prioritising this candidate.`,
+    };
+    onSend(contextual[label] || label);
+  };
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -492,7 +552,7 @@ function ThreadView({
       <div className="px-4 pt-2 pb-1.5 shrink-0" style={{ borderTop: "1px solid var(--border)", background: "var(--card)" }}>
         <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
           {shortcuts.map((s) => (
-            <button key={s} onClick={() => onSend(s)}
+            <button key={s} onClick={() => handleShortcut(s)}
               className="rounded-full px-3 py-1.5 shrink-0 transition-colors hover:bg-accent"
               style={{ background: "var(--secondary)", border: "1px solid var(--border)", fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, whiteSpace: "nowrap" }}>
               {s}
@@ -547,6 +607,9 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
   );
   const [panel, setPanel] = useState<PanelView>("thread");
   const [search, setSearch] = useState("");
+  const [showNewConvModal, setShowNewConvModal] = useState(false);
+  const [newConvName, setNewConvName] = useState("");
+  const [newConvRole, setNewConvRole] = useState("");
 
   const activeConv = conversations.find((c) => c.id === activeConvId)!;
 
@@ -564,15 +627,58 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
     }, 900);
   };
 
-  const sendMeeting = (slot: MeetingSlot) => {
-    const msg: ChatMsg = {
-      id: `meet${Date.now()}`, role: "employer",
-      text: `I'd like to schedule a ${slot.label} on ${slot.date} at ${slot.time}. Does that work for you?`,
+  const handleCreateConv = () => {
+    if (!newConvName.trim()) return;
+    const initials = newConvName.trim().split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+    const bgPool = ["#4A5568", "#7C5C4A", "#4A6741", "#6B4F6B", "#7A4545"];
+    const bg = bgPool[Math.floor(Math.random() * bgPool.length)];
+    const newConv = makeConversation(
+      `new${Date.now()}`, newConvName.trim(), initials, bg,
+      newConvRole.trim() || "Prospective Candidate", "shortlisted", 0
+    );
+    setConversations((prev) => [newConv, ...prev]);
+    setActiveConvId(newConv.id);
+    setPanel("thread");
+    setShowNewConvModal(false);
+    setNewConvName("");
+    setNewConvRole("");
+  };
+
+  const sendOffer = () => {
+    const offerMsg: ChatMsg = {
+      id: `off${Date.now()}`, role: "employer",
+      text: `Hi ${activeConv.candidateName}, we'd like to formally extend an offer for the ${activeConv.role} position. Please find the offer details attached — feel free to reach out with any questions!`,
       time: "Just now",
-      attachment: { type: "meeting", label: `📅 ${slot.label} · ${slot.date} at ${slot.time}` },
+      attachment: { type: "offer", label: `📋 Offer Letter — ${activeConv.role}` },
+    };
+    const sysMsg: ChatMsg = {
+      id: `sys${Date.now()}`, role: "system",
+      text: `Offer letter sent to ${activeConv.candidateName}. Stage automatically updated to Offer Sent.`,
+      time: "Just now",
     };
     setConversations((prev) =>
-      prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, msg], lastMsg: `Meeting invite: ${slot.label}`, lastTime: "Just now" } : c)
+      prev.map((c) => c.id === activeConvId
+        ? { ...c, stage: "offer", messages: [...c.messages, offerMsg, sysMsg], lastMsg: "Offer letter sent", lastTime: "Just now" }
+        : c)
+    );
+    setPanel("thread");
+  };
+
+  const sendMeeting = (slot: MeetingSlot, eventId: string) => {
+    const msg: ChatMsg = {
+      id: `meet${Date.now()}`, role: "employer",
+      text: `I've sent a calendar invite for our ${slot.label} on ${slot.date} at ${slot.time}. Looking forward to it!`,
+      time: "Just now",
+      attachment: { type: "meeting", label: `📅 ${slot.label} · Google Calendar: ${eventId}` },
+    };
+    const sysMsg: ChatMsg = {
+      id: `sys${Date.now()}`, role: "system",
+      text: `Meeting confirmed. AI Summary Brief automatically attached to Calendar Event ${eventId}.`,
+      time: "Just now",
+    };
+    
+    setConversations((prev) =>
+      prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, msg, sysMsg], lastMsg: `Meeting invite: ${slot.label}`, lastTime: "Just now" } : c)
     );
     setPanel("thread");
   };
@@ -599,7 +705,11 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
             <MessageSquareMore size={14} style={{ color: "var(--primary)" }} strokeWidth={2} />
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Introductions</span>
           </div>
-          <button className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-accent transition-colors" style={{ border: "1px solid var(--border)" }}>
+          <button
+            onClick={() => setShowNewConvModal(true)}
+            className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-accent transition-colors"
+            style={{ border: "1px solid var(--border)" }}
+          >
             <Plus size={12} style={{ color: "var(--muted-foreground)" }} strokeWidth={2.5} />
           </button>
         </div>
@@ -688,13 +798,77 @@ export function EmployerChatbox({ prefilledMessage, candidateName, onClose }: Pr
             />
           )}
           {panel === "schedule" && (
-            <SchedulePanel conv={activeConv} onSendMeeting={sendMeeting} />
+            <SchedulePanel
+              conv={activeConv}
+              onSendMeeting={sendMeeting}
+              onNavigateToThread={() => setPanel("thread")}
+            />
           )}
           {panel === "hiring" && (
-            <HiringPanel conv={activeConv} onStageChange={changeStage} />
+            <HiringPanel conv={activeConv} onStageChange={changeStage} onSendOffer={sendOffer} />
           )}
         </div>
       </div>
+
+      {/* ── New Conversation Modal ── */}
+      {showNewConvModal && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(3px)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowNewConvModal(false); }}
+        >
+          <div className="rounded-2xl p-5 w-80" style={{ background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.18)" }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)" }}>New Introduction</h3>
+              <button onClick={() => setShowNewConvModal(false)} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-accent">
+                <X size={12} style={{ color: "var(--muted-foreground)" }} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 4 }}>Candidate Name *</label>
+                <input
+                  autoFocus
+                  value={newConvName}
+                  onChange={(e) => setNewConvName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleCreateConv(); }}
+                  placeholder="e.g. Alex Rivera"
+                  className="w-full rounded-lg px-3 outline-none"
+                  style={{ background: "var(--input-background)", border: "1px solid var(--border)", height: 36, fontSize: 12, color: "var(--foreground)" }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 4 }}>Role (optional)</label>
+                <input
+                  value={newConvRole}
+                  onChange={(e) => setNewConvRole(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleCreateConv(); }}
+                  placeholder="e.g. Senior Engineer"
+                  className="w-full rounded-lg px-3 outline-none"
+                  style={{ background: "var(--input-background)", border: "1px solid var(--border)", height: 36, fontSize: 12, color: "var(--foreground)" }}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setShowNewConvModal(false)}
+                className="flex-1 rounded-lg py-2 transition-colors hover:bg-accent"
+                style={{ fontSize: 12, color: "var(--muted-foreground)", border: "1px solid var(--border)", background: "var(--secondary)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateConv}
+                disabled={!newConvName.trim()}
+                className="flex-1 rounded-lg py-2 transition-all"
+                style={{ fontSize: 12, fontWeight: 600, background: newConvName.trim() ? "var(--primary)" : "var(--muted)", color: "#fff", opacity: newConvName.trim() ? 1 : 0.45 }}
+              >
+                Start Conversation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

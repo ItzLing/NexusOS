@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TrendingUp, BookOpen, Send, Bookmark, BadgeCheck, Star, AlertCircle, ArrowRight } from "lucide-react";
 import type { Candidate } from "./CandidateCard";
 
@@ -97,6 +98,7 @@ interface Props {
 
 export function InsightPanel({ candidate, onInitiateIntro }: Props) {
   const insight = getInsight(candidate.id);
+  const [saved, setSaved] = useState(false);
 
   return (
     <div className="flex flex-col h-full" style={{ fontFamily: "var(--font-sans)" }}>
@@ -133,7 +135,7 @@ export function InsightPanel({ candidate, onInitiateIntro }: Props) {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5" style={{ scrollbarWidth: "none" }}>
 
-        {/* AI Trajectory Justification — structured bullets */}
+        {/* AI Trajectory Justification */}
         <section>
           <div className="flex items-center gap-2 mb-2.5">
             <BookOpen size={13} style={{ color: "var(--primary)" }} strokeWidth={2.2} />
@@ -233,11 +235,22 @@ export function InsightPanel({ candidate, onInitiateIntro }: Props) {
           Initiate Direct Introduction
         </button>
         <button
-          className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm transition-all duration-150"
-          style={{ background: "var(--accent)", color: "var(--foreground)", fontWeight: 500, border: "1px solid var(--border)" }}
+          onClick={() => setSaved((p) => !p)}
+          className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm transition-all duration-200"
+          style={{
+            background: saved ? "#ECFDF5" : "var(--accent)",
+            color: saved ? "#065F46" : "var(--foreground)",
+            fontWeight: 500,
+            border: `1px solid ${saved ? "#A7F3D0" : "var(--border)"}`,
+          }}
         >
-          <Bookmark size={14} strokeWidth={1.8} />
-          Save to Long-term Pipeline
+          <Bookmark
+            size={14}
+            strokeWidth={1.8}
+            fill={saved ? "#065F46" : "none"}
+            color={saved ? "#065F46" : "currentColor"}
+          />
+          {saved ? "Saved to Pipeline ✓" : "Save to Long-term Pipeline"}
         </button>
       </div>
     </div>

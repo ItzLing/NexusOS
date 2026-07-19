@@ -1,17 +1,18 @@
 import { useState } from "react";
 import {
   Search, Bell, ChevronDown, SlidersHorizontal, ArrowUpDown,
-  Filter, Sparkles, Building2, User, LayoutList, Zap, Briefcase,
-  Settings, Brain, MessageSquareMore, ChevronRight,
+  Filter, Sparkles, Building2, LayoutList, Zap, Briefcase,
+  Settings, Brain, MessageSquareMore, ChevronRight, LogOut,
 } from "lucide-react";
 import { CandidateCard, type Candidate } from "./components/CandidateCard";
 import { InsightPanel } from "./components/InsightPanel";
-import { EmployeeView } from "./components/EmployeeView";
 import { EmployerChatbox } from "./components/EmployerChatbox";
 import { OpenRolesView } from "./components/OpenRolesView";
 import { ActiveMatchesView } from "./components/ActiveMatchesView";
+import { LoginPage } from "./components/LoginPage";
+import { EmployeeShell } from "./components/EmployeeShell";
 
-type AppMode = "employer" | "employee";
+type AuthRole = "employer" | "employee";
 type EmployerView = "pipeline" | "matches" | "roles" | "messages";
 
 const candidates: Candidate[] = [
@@ -63,7 +64,6 @@ const candidates: Candidate[] = [
 ];
 
 type SortKey = "Trajectory Alignment" | "Career Momentum" | "Skills Match" | "Experience Depth";
-
 const momentumOrder = { rising: 0, pivoting: 1, stable: 2 };
 
 function sortCandidates(list: Candidate[], key: SortKey): Candidate[] {
@@ -127,16 +127,19 @@ function Sidebar({ activeView, onNav }: { activeView: EmployerView; onNav: (v: E
   );
 }
 
-/* ─── Pipeline view (candidate list + insight panel) ─── */
-interface PipelineProps {
-  onInitiateIntro: (name: string) => void;
-}
+/* ─── Pipeline view ─── */
+interface PipelineProps { onInitiateIntro: (name: string) => void; }
+type ViewMode = "card" | "compact";
 
 function PipelineView({ onInitiateIntro }: PipelineProps) {
   const [selectedId, setSelectedId] = useState("c1");
   const [sortBy, setSortBy] = useState<SortKey>("Trajectory Alignment");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [activePhaseFilter, setActivePhaseFilter] = useState<string>("All");
+  const [activeMomentumFilter, setActiveMomentumFilter] = useState<string>("All");
+  const [viewMode, setViewMode] = useState<ViewMode>("card");
 
   const selectedCandidate = candidates.find((c) => c.id === selectedId) ?? candidates[0];
 
@@ -145,9 +148,12 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.currentTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  ).filter((c) => activePhaseFilter === "All" || c.phase === activePhaseFilter)
+   .filter((c) => activeMomentumFilter === "All" || c.momentum === activeMomentumFilter);
 
   const sorted = sortCandidates(filtered, sortBy);
+  const phaseOptions = ["All", "Ready for Pivot", "Accelerating", "Exploring", "Deep Specializing"];
+  const momentumOptions = ["All", "rising", "pivoting", "stable"];
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -161,9 +167,12 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
             <span style={{ fontSize: "11px", color: "var(--muted-foreground)" }}>{sorted.length} candidates</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button className="flex items-center gap-1 rounded-md px-2.5 transition-colors hover:bg-accent"
-              style={{ border: "1px solid var(--border)", color: "var(--muted-foreground)", height: "28px", fontSize: "11px" }}>
-              <Filter size={10} strokeWidth={2} />Filter
+            <button
+              onClick={() => { setFilterOpen((p) => !p); }}
+              className="flex items-center gap-1 rounded-md px-2.5 transition-colors hover:bg-accent"
+              style={{ border: `1px solid ${filterOpen ? "var(--primary)" : "var(--border)"}`, color: filterOpen ? "var(--primary)" : "var(--muted-foreground)", height: "28px", fontSize: "11px", background: filterOpen ? "rgba(194,98,42,0.06)" : "transparent" }}
+            >
+              <Filter size={10} strokeWidth={2} />{filterOpen ? "Filters ✓" : "Filter"}
             </button>
             <div className="relative">
               <button onClick={() => setShowSortDropdown((p) => !p)}
@@ -186,14 +195,17 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
                 </div>
               )}
             </div>
-            <button className="flex items-center gap-1 rounded-md px-2.5 transition-colors hover:bg-accent"
-              style={{ border: "1px solid var(--border)", color: "var(--muted-foreground)", height: "28px", fontSize: "11px" }}>
-              <SlidersHorizontal size={10} strokeWidth={2} />View
+            <button
+              onClick={() => setViewMode((p) => p === "card" ? "compact" : "card")}
+              className="flex items-center gap-1 rounded-md px-2.5 transition-colors hover:bg-accent"
+              style={{ border: "1px solid var(--border)", color: "var(--muted-foreground)", height: "28px", fontSize: "11px", background: viewMode === "compact" ? "var(--accent)" : "transparent" }}
+            >
+              <SlidersHorizontal size={10} strokeWidth={2} />{viewMode === "compact" ? "Cards" : "Compact"}
             </button>
           </div>
         </div>
 
-        {/* Inline search within pipeline */}
+        {/* Inline search */}
         <div className="px-3 py-2 shrink-0" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-2 rounded-md px-3" style={{ background: "var(--input-background)", height: "30px" }}>
             <Search size={11} style={{ color: "var(--muted-foreground)" }} strokeWidth={2} />
@@ -203,10 +215,49 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
           </div>
         </div>
 
+        {/* Filter panel */}
+        {filterOpen && (
+          <div className="px-4 py-3 shrink-0 space-y-2.5" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
+            <div>
+              <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.08em" }}>Phase</p>
+              <div className="flex gap-1 flex-wrap">
+                {phaseOptions.map((p) => (
+                  <button key={p} onClick={() => setActivePhaseFilter(p)}
+                    className="rounded-full px-2.5 py-0.5 transition-colors"
+                    style={{ fontSize: 10, fontWeight: activePhaseFilter === p ? 600 : 400, background: activePhaseFilter === p ? "var(--primary)" : "var(--secondary)", color: activePhaseFilter === p ? "#fff" : "var(--muted-foreground)", border: activePhaseFilter === p ? "none" : "1px solid var(--border)" }}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: 9, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.08em" }}>Momentum</p>
+              <div className="flex gap-1 flex-wrap">
+                {momentumOptions.map((m) => (
+                  <button key={m} onClick={() => setActiveMomentumFilter(m)}
+                    className="rounded-full px-2.5 py-0.5 transition-colors"
+                    style={{ fontSize: 10, fontWeight: activeMomentumFilter === m ? 600 : 400, background: activeMomentumFilter === m ? "var(--primary)" : "var(--secondary)", color: activeMomentumFilter === m ? "#fff" : "var(--muted-foreground)", border: activeMomentumFilter === m ? "none" : "1px solid var(--border)" }}>
+                    {m === "All" ? "All" : m.charAt(0).toUpperCase() + m.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Candidate list */}
         <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1" style={{ scrollbarWidth: "none" }}>
-          {sorted.length > 0 ? sorted.map((c) => (
+          {sorted.length > 0 ? sorted.map((c) => viewMode === "card" ? (
             <CandidateCard key={c.id} candidate={c} selected={c.id === selectedId} onClick={() => setSelectedId(c.id)} />
+          ) : (
+            <button key={c.id} onClick={() => setSelectedId(c.id)}
+              className="w-full flex items-center gap-3 rounded-lg px-4 py-2.5 text-left transition-all"
+              style={{ background: c.id === selectedId ? "#fff" : "transparent", border: c.id === selectedId ? "1.5px solid var(--primary)" : "1.5px solid transparent" }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-white" style={{ background: c.avatarBg, fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 600 }}>{c.initials}</div>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)", flex: 1 }}>{c.name}</span>
+              <span style={{ fontSize: 10, color: "var(--muted-foreground)" }}>{c.currentTitle}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--primary)", fontFamily: "var(--font-mono)" }}>{c.trajectoryScore}%</span>
+            </button>
           )) : (
             <div className="flex flex-col items-center justify-center h-48 text-center">
               <Search size={22} style={{ color: "var(--muted-foreground)", marginBottom: 8 }} />
@@ -215,7 +266,7 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
           )}
         </div>
 
-        {/* Footer phase summary */}
+        {/* Footer */}
         <div className="flex items-center gap-5 px-5 shrink-0"
           style={{ borderTop: "1px solid var(--border)", background: "var(--card)", height: "40px" }}>
           {[
@@ -242,14 +293,26 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
   );
 }
 
-/* ─── Root App ─── */
-export default function App() {
-  /* MARKER-MAKE-KIT-INVOKED */
-  const [appMode, setAppMode] = useState<AppMode>("employer");
+/* ─── Employer Shell ─── */
+interface EmployerShellProps {
+  onSignOut: () => void;
+}
+
+function EmployerShell({ onSignOut }: EmployerShellProps) {
   const [employerView, setEmployerView] = useState<EmployerView>("pipeline");
-  const [notifCount] = useState(4);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [chatIntroName, setChatIntroName] = useState<string | undefined>();
   const [chatPrefilledMsg, setChatPrefilledMsg] = useState<string | undefined>();
+
+  const notifications = [
+    { id: "n1", dot: "#C2622A", text: "Jordan Park matches Staff Data Infrastructure Eng. at 94%", time: "2h ago" },
+    { id: "n2", dot: "#1D4E89", text: "Nneka Okonkwo replied to your message", time: "4h ago" },
+    { id: "n3", dot: "#065F46", text: "Marcus Webb moved to Offer stage", time: "Yesterday" },
+    { id: "n4", dot: "#7E22CE", text: "Sofia Reyes matches Product Manager, Data Experience at 86%", time: "2 days ago" },
+  ];
+  const [readNotifs, setReadNotifs] = useState<Set<string>>(new Set());
+  const unreadCount = notifications.filter((n) => !readNotifs.has(n.id)).length;
 
   const handleInitiateIntro = (candidateName: string) => {
     setChatIntroName(candidateName);
@@ -257,6 +320,8 @@ export default function App() {
       `Hi ${candidateName}, I came across your profile on Career OS and was genuinely impressed by your trajectory — particularly your work on distributed systems and the direction your skills are heading. I think there's a strong fit between your arc and a role we're building toward. Would you be open to a brief conversation this week?`
     );
     setEmployerView("messages");
+    setNotifOpen(false);
+    setProfileOpen(false);
   };
 
   const handleCloseChat = () => {
@@ -266,34 +331,30 @@ export default function App() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--background)", fontFamily: "var(--font-sans)" }}>
-      {appMode === "employer" && (
-        <Sidebar activeView={employerView} onNav={(v) => { setEmployerView(v); handleCloseChat(); }} />
-      )}
+      <Sidebar activeView={employerView} onNav={(v) => { setEmployerView(v); handleCloseChat(); }} />
 
-      <div className={`flex flex-col flex-1 min-w-0 ${appMode === "employer" ? "ml-16" : ""}`}>
+      <div className="flex flex-col flex-1 min-w-0 ml-16">
         {/* Top Header */}
-        <header className="flex items-center gap-4 px-6 shrink-0"
+        <header className="flex items-center gap-4 px-6 shrink-0 relative"
           style={{ background: "var(--card)", borderBottom: "1px solid var(--border)", height: "52px", zIndex: 30 }}>
           <div className="flex items-center gap-2 mr-4 shrink-0">
             <Sparkles size={14} style={{ color: "var(--primary)" }} />
-            <span style={{ fontWeight: 600, fontSize: "13px", color: "var(--foreground)", letterSpacing: "-0.01em" }}>Career OS</span>
+            <span style={{ fontWeight: 600, fontSize: "13px", color: "var(--foreground)", letterSpacing: "-0.01em" }}>Nexus OS</span>
             <span className="rounded px-1.5 py-0.5" style={{ background: "var(--accent)", color: "var(--muted-foreground)", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500 }}>BETA</span>
           </div>
 
-          {appMode === "employer" && (
-            <div className="hidden md:flex items-center gap-1.5" style={{ fontSize: "12px", color: "var(--muted-foreground)" }}>
-              <span>Workspace</span>
-              <span>/</span>
-              <span style={{ color: "var(--foreground)" }}>
-                {employerView === "pipeline" && "Talent Pipeline"}
-                {employerView === "matches" && "Active Matches"}
-                {employerView === "roles" && "Open Roles"}
-                {employerView === "messages" && "Direct Introductions"}
-              </span>
-            </div>
-          )}
+          <div className="hidden md:flex items-center gap-1.5" style={{ fontSize: "12px", color: "var(--muted-foreground)" }}>
+            <span>Workspace</span>
+            <span>/</span>
+            <span style={{ color: "var(--foreground)" }}>
+              {employerView === "pipeline" && "Talent Pipeline"}
+              {employerView === "matches" && "Active Matches"}
+              {employerView === "roles" && "Open Roles"}
+              {employerView === "messages" && "Direct Introductions"}
+            </span>
+          </div>
 
-          {appMode === "employer" && employerView === "pipeline" && (
+          {employerView === "pipeline" && (
             <div className="flex-1 flex justify-center px-8">
               <div className="flex items-center gap-2 w-full max-w-md rounded-lg px-3"
                 style={{ background: "var(--input-background)", height: "32px", border: "1px solid transparent" }}>
@@ -306,63 +367,109 @@ export default function App() {
           )}
 
           <div className="flex items-center gap-2 ml-auto shrink-0">
-            {/* Mode switcher */}
-            <div className="flex items-center rounded-full p-0.5" style={{ background: "var(--input-background)", border: "1px solid var(--border)" }}>
-              <button onClick={() => setAppMode("employer")}
-                className="flex items-center gap-1.5 rounded-full px-3 transition-all duration-200"
-                style={{ height: "26px", fontSize: "11px", fontWeight: appMode === "employer" ? 600 : 400, background: appMode === "employer" ? "var(--card)" : "transparent", color: appMode === "employer" ? "var(--foreground)" : "var(--muted-foreground)", boxShadow: appMode === "employer" ? "0 1px 4px rgba(0,0,0,0.08)" : "none" }}>
-                <Building2 size={10} strokeWidth={2} />Employer
-              </button>
-              <button onClick={() => setAppMode("employee")}
-                className="flex items-center gap-1.5 rounded-full px-3 transition-all duration-200"
-                style={{ height: "26px", fontSize: "11px", fontWeight: appMode === "employee" ? 600 : 400, background: appMode === "employee" ? "#111" : "transparent", color: appMode === "employee" ? "#E4E4E7" : "var(--muted-foreground)", boxShadow: appMode === "employee" ? "0 1px 4px rgba(0,0,0,0.22)" : "none" }}>
-                <User size={10} strokeWidth={2} />Employee
-              </button>
-            </div>
-
-            <button className="relative w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-accent">
+            {/* Bell */}
+            <button
+              id="bell-btn"
+              onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); setReadNotifs(new Set(notifications.map((n) => n.id))); }}
+              className="relative w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-accent"
+            >
               <Bell size={15} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
-              {notifCount > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-white"
                   style={{ background: "var(--primary)", fontSize: "8px", fontFamily: "var(--font-mono)" }}>
-                  {notifCount}
+                  {unreadCount}
                 </span>
               )}
             </button>
-            <div className="flex items-center gap-2 rounded-lg px-2.5 cursor-pointer hover:bg-accent transition-colors"
-              style={{ border: "1px solid var(--border)", height: "32px" }}>
+
+            {/* Notification dropdown */}
+            {notifOpen && (
+              <div className="absolute right-14 top-12 rounded-xl z-50 overflow-hidden" style={{ width: 320, background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}>
+                <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Notifications</p>
+                  <p style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 1 }}>All caught up on 4 alerts</p>
+                </div>
+                {notifications.map((n) => (
+                  <div key={n.id} className="flex items-start gap-3 px-4 py-3 hover:bg-accent transition-colors" style={{ borderBottom: "1px solid var(--border)" }}>
+                    <span className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: n.dot }} />
+                    <div className="flex-1">
+                      <p style={{ fontSize: 12, color: "var(--foreground)", lineHeight: 1.5 }}>{n.text}</p>
+                      <p style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginTop: 2 }}>{n.time}</p>
+                    </div>
+                  </div>
+                ))}
+                <button onClick={() => setNotifOpen(false)} className="w-full py-2.5 text-center hover:bg-accent transition-colors" style={{ fontSize: 11, color: "var(--primary)", fontWeight: 500 }}>
+                  Mark all as read
+                </button>
+              </div>
+            )}
+
+            {/* Profile */}
+            <div
+              className="relative flex items-center gap-2 rounded-lg px-2.5 cursor-pointer hover:bg-accent transition-colors"
+              style={{ border: "1px solid var(--border)", height: "32px" }}
+              onClick={() => { setProfileOpen((p) => !p); setNotifOpen(false); }}
+            >
               <div className="w-6 h-6 rounded-full flex items-center justify-center text-white"
                 style={{ background: "#7C5C4A", fontFamily: "var(--font-mono)", fontSize: "9px", fontWeight: 500 }}>AK</div>
               <span style={{ fontSize: "12px", color: "var(--foreground)", fontWeight: 500 }}>Arjun K.</span>
-              <ChevronDown size={11} style={{ color: "var(--muted-foreground)" }} />
+              <ChevronDown size={11} style={{ color: "var(--muted-foreground)", transform: profileOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+
+              {profileOpen && (
+                <div className="absolute right-0 top-9 rounded-xl z-50 overflow-hidden" style={{ width: 200, background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}>
+                  <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>Arjun Kumar</p>
+                    <p style={{ fontSize: 10, color: "var(--muted-foreground)" }}>arjun@nexusos.io</p>
+                  </div>
+                  <button className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors" style={{ fontSize: 12, color: "var(--foreground)" }}
+                    onClick={() => setProfileOpen(false)}>
+                    Account Settings
+                  </button>
+                  <div style={{ borderTop: "1px solid var(--border)" }}>
+                    <button
+                      onClick={() => { setProfileOpen(false); onSignOut(); }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors flex items-center gap-2"
+                      style={{ fontSize: 12, color: "#DC2626" }}
+                    >
+                      <LogOut size={12} strokeWidth={2} />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
 
-        {/* ── Employee mode ── */}
-        {appMode === "employee" && (
-          <div className="flex-1 flex items-center justify-center overflow-auto"
-            style={{ background: "#080806", padding: "40px 0", backgroundImage: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(163,230,53,0.04) 0%, transparent 70%)" }}>
-            <EmployeeView />
-          </div>
-        )}
-
-        {/* ── Employer views ── */}
-        {appMode === "employer" && (
-          <div className="flex flex-1 overflow-hidden">
-            {employerView === "pipeline" && <PipelineView onInitiateIntro={handleInitiateIntro} />}
-            {employerView === "matches" && <ActiveMatchesView />}
-            {employerView === "roles" && <OpenRolesView />}
-            {employerView === "messages" && (
-              <EmployerChatbox
-                candidateName={chatIntroName}
-                prefilledMessage={chatPrefilledMsg}
-                onClose={() => setEmployerView("pipeline")}
-              />
-            )}
-          </div>
-        )}
+        {/* Employer views */}
+        <div className="flex flex-1 overflow-hidden">
+          {employerView === "pipeline" && <PipelineView onInitiateIntro={handleInitiateIntro} />}
+          {employerView === "matches" && <ActiveMatchesView onFastTrack={handleInitiateIntro} />}
+          {employerView === "roles" && <OpenRolesView />}
+          {employerView === "messages" && (
+            <EmployerChatbox
+              candidateName={chatIntroName}
+              prefilledMessage={chatPrefilledMsg}
+              onClose={() => setEmployerView("pipeline")}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
+}
+
+/* ─── Root App — auth router ─── */
+export default function App() {
+  const [authRole, setAuthRole] = useState<AuthRole | null>(null);
+
+  if (authRole === null) {
+    return <LoginPage onLogin={(role) => setAuthRole(role)} />;
+  }
+
+  if (authRole === "employee") {
+    return <EmployeeShell onSignOut={() => setAuthRole(null)} />;
+  }
+
+  return <EmployerShell onSignOut={() => setAuthRole(null)} />;
 }
