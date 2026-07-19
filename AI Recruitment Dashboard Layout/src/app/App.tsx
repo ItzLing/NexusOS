@@ -1,17 +1,18 @@
 import { useState } from "react";
 import {
   Search, Bell, ChevronDown, SlidersHorizontal, ArrowUpDown,
-  Filter, Sparkles, Building2, User, LayoutList, Zap, Briefcase,
-  Settings, Brain, MessageSquareMore, ChevronRight,
+  Filter, Sparkles, Building2, LayoutList, Zap, Briefcase,
+  Settings, Brain, MessageSquareMore, ChevronRight, LogOut,
 } from "lucide-react";
 import { CandidateCard, type Candidate } from "./components/CandidateCard";
 import { InsightPanel } from "./components/InsightPanel";
-import { EmployeeView } from "./components/EmployeeView";
 import { EmployerChatbox } from "./components/EmployerChatbox";
 import { OpenRolesView } from "./components/OpenRolesView";
 import { ActiveMatchesView } from "./components/ActiveMatchesView";
+import { LoginPage } from "./components/LoginPage";
+import { EmployeeShell } from "./components/EmployeeShell";
 
-type AppMode = "employer" | "employee";
+type AuthRole = "employer" | "employee";
 type EmployerView = "pipeline" | "matches" | "roles" | "messages";
 
 const candidates: Candidate[] = [
@@ -63,7 +64,6 @@ const candidates: Candidate[] = [
 ];
 
 type SortKey = "Trajectory Alignment" | "Career Momentum" | "Skills Match" | "Experience Depth";
-
 const momentumOrder = { rising: 0, pivoting: 1, stable: 2 };
 
 function sortCandidates(list: Candidate[], key: SortKey): Candidate[] {
@@ -127,11 +127,8 @@ function Sidebar({ activeView, onNav }: { activeView: EmployerView; onNav: (v: E
   );
 }
 
-/* ─── Pipeline view (candidate list + insight panel) ─── */
-interface PipelineProps {
-  onInitiateIntro: (name: string) => void;
-}
-
+/* ─── Pipeline view ─── */
+interface PipelineProps { onInitiateIntro: (name: string) => void; }
 type ViewMode = "card" | "compact";
 
 function PipelineView({ onInitiateIntro }: PipelineProps) {
@@ -155,7 +152,6 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
    .filter((c) => activeMomentumFilter === "All" || c.momentum === activeMomentumFilter);
 
   const sorted = sortCandidates(filtered, sortBy);
-
   const phaseOptions = ["All", "Ready for Pivot", "Accelerating", "Exploring", "Deep Specializing"];
   const momentumOptions = ["All", "rising", "pivoting", "stable"];
 
@@ -209,7 +205,7 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
           </div>
         </div>
 
-        {/* Inline search within pipeline */}
+        {/* Inline search */}
         <div className="px-3 py-2 shrink-0" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-2 rounded-md px-3" style={{ background: "var(--input-background)", height: "30px" }}>
             <Search size={11} style={{ color: "var(--muted-foreground)" }} strokeWidth={2} />
@@ -270,7 +266,7 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
           )}
         </div>
 
-        {/* Footer phase summary */}
+        {/* Footer */}
         <div className="flex items-center gap-5 px-5 shrink-0"
           style={{ borderTop: "1px solid var(--border)", background: "var(--card)", height: "40px" }}>
           {[
@@ -297,10 +293,12 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
   );
 }
 
-/* ─── Root App ─── */
-export default function App() {
-  /* MARKER-MAKE-KIT-INVOKED */
-  const [appMode, setAppMode] = useState<AppMode>("employer");
+/* ─── Employer Shell ─── */
+interface EmployerShellProps {
+  onSignOut: () => void;
+}
+
+function EmployerShell({ onSignOut }: EmployerShellProps) {
   const [employerView, setEmployerView] = useState<EmployerView>("pipeline");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -314,6 +312,7 @@ export default function App() {
     { id: "n4", dot: "#7E22CE", text: "Sofia Reyes matches Product Manager, Data Experience at 86%", time: "2 days ago" },
   ];
   const [readNotifs, setReadNotifs] = useState<Set<string>>(new Set());
+  const unreadCount = notifications.filter((n) => !readNotifs.has(n.id)).length;
 
   const handleInitiateIntro = (candidateName: string) => {
     setChatIntroName(candidateName);
@@ -330,38 +329,32 @@ export default function App() {
     setChatPrefilledMsg(undefined);
   };
 
-  const unreadCount = notifications.filter((n) => !readNotifs.has(n.id)).length;
-
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--background)", fontFamily: "var(--font-sans)" }}>
-      {appMode === "employer" && (
-        <Sidebar activeView={employerView} onNav={(v) => { setEmployerView(v); handleCloseChat(); }} />
-      )}
+      <Sidebar activeView={employerView} onNav={(v) => { setEmployerView(v); handleCloseChat(); }} />
 
-      <div className={`flex flex-col flex-1 min-w-0 ${appMode === "employer" ? "ml-16" : ""}`}>
+      <div className="flex flex-col flex-1 min-w-0 ml-16">
         {/* Top Header */}
-        <header className="flex items-center gap-4 px-6 shrink-0"
+        <header className="flex items-center gap-4 px-6 shrink-0 relative"
           style={{ background: "var(--card)", borderBottom: "1px solid var(--border)", height: "52px", zIndex: 30 }}>
           <div className="flex items-center gap-2 mr-4 shrink-0">
             <Sparkles size={14} style={{ color: "var(--primary)" }} />
-            <span style={{ fontWeight: 600, fontSize: "13px", color: "var(--foreground)", letterSpacing: "-0.01em" }}>Career OS</span>
+            <span style={{ fontWeight: 600, fontSize: "13px", color: "var(--foreground)", letterSpacing: "-0.01em" }}>Nexus OS</span>
             <span className="rounded px-1.5 py-0.5" style={{ background: "var(--accent)", color: "var(--muted-foreground)", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500 }}>BETA</span>
           </div>
 
-          {appMode === "employer" && (
-            <div className="hidden md:flex items-center gap-1.5" style={{ fontSize: "12px", color: "var(--muted-foreground)" }}>
-              <span>Workspace</span>
-              <span>/</span>
-              <span style={{ color: "var(--foreground)" }}>
-                {employerView === "pipeline" && "Talent Pipeline"}
-                {employerView === "matches" && "Active Matches"}
-                {employerView === "roles" && "Open Roles"}
-                {employerView === "messages" && "Direct Introductions"}
-              </span>
-            </div>
-          )}
+          <div className="hidden md:flex items-center gap-1.5" style={{ fontSize: "12px", color: "var(--muted-foreground)" }}>
+            <span>Workspace</span>
+            <span>/</span>
+            <span style={{ color: "var(--foreground)" }}>
+              {employerView === "pipeline" && "Talent Pipeline"}
+              {employerView === "matches" && "Active Matches"}
+              {employerView === "roles" && "Open Roles"}
+              {employerView === "messages" && "Direct Introductions"}
+            </span>
+          </div>
 
-          {appMode === "employer" && employerView === "pipeline" && (
+          {employerView === "pipeline" && (
             <div className="flex-1 flex justify-center px-8">
               <div className="flex items-center gap-2 w-full max-w-md rounded-lg px-3"
                 style={{ background: "var(--input-background)", height: "32px", border: "1px solid transparent" }}>
@@ -374,20 +367,7 @@ export default function App() {
           )}
 
           <div className="flex items-center gap-2 ml-auto shrink-0">
-            {/* Mode switcher */}
-            <div className="flex items-center rounded-full p-0.5" style={{ background: "var(--input-background)", border: "1px solid var(--border)" }}>
-              <button onClick={() => setAppMode("employer")}
-                className="flex items-center gap-1.5 rounded-full px-3 transition-all duration-200"
-                style={{ height: "26px", fontSize: "11px", fontWeight: appMode === "employer" ? 600 : 400, background: appMode === "employer" ? "var(--card)" : "transparent", color: appMode === "employer" ? "var(--foreground)" : "var(--muted-foreground)", boxShadow: appMode === "employer" ? "0 1px 4px rgba(0,0,0,0.08)" : "none" }}>
-                <Building2 size={10} strokeWidth={2} />Employer
-              </button>
-              <button onClick={() => setAppMode("employee")}
-                className="flex items-center gap-1.5 rounded-full px-3 transition-all duration-200"
-                style={{ height: "26px", fontSize: "11px", fontWeight: appMode === "employee" ? 600 : 400, background: appMode === "employee" ? "#111" : "transparent", color: appMode === "employee" ? "#E4E4E7" : "var(--muted-foreground)", boxShadow: appMode === "employee" ? "0 1px 4px rgba(0,0,0,0.22)" : "none" }}>
-                <User size={10} strokeWidth={2} />Employee
-              </button>
-            </div>
-
+            {/* Bell */}
             <button
               id="bell-btn"
               onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); setReadNotifs(new Set(notifications.map((n) => n.id))); }}
@@ -401,6 +381,7 @@ export default function App() {
                 </span>
               )}
             </button>
+
             {/* Notification dropdown */}
             {notifOpen && (
               <div className="absolute right-14 top-12 rounded-xl z-50 overflow-hidden" style={{ width: 320, background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}>
@@ -422,6 +403,8 @@ export default function App() {
                 </button>
               </div>
             )}
+
+            {/* Profile */}
             <div
               className="relative flex items-center gap-2 rounded-lg px-2.5 cursor-pointer hover:bg-accent transition-colors"
               style={{ border: "1px solid var(--border)", height: "32px" }}
@@ -431,23 +414,24 @@ export default function App() {
                 style={{ background: "#7C5C4A", fontFamily: "var(--font-mono)", fontSize: "9px", fontWeight: 500 }}>AK</div>
               <span style={{ fontSize: "12px", color: "var(--foreground)", fontWeight: 500 }}>Arjun K.</span>
               <ChevronDown size={11} style={{ color: "var(--muted-foreground)", transform: profileOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-              {/* Profile dropdown */}
+
               {profileOpen && (
                 <div className="absolute right-0 top-9 rounded-xl z-50 overflow-hidden" style={{ width: 200, background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}>
                   <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
                     <p style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>Arjun Kumar</p>
-                    <p style={{ fontSize: 10, color: "var(--muted-foreground)" }}>arjun@company.io</p>
+                    <p style={{ fontSize: 10, color: "var(--muted-foreground)" }}>arjun@nexusos.io</p>
                   </div>
-                  {[
-                    { label: "Account Settings", action: () => setProfileOpen(false) },
-                    { label: "Switch to Employee View", action: () => { setAppMode("employee"); setProfileOpen(false); } },
-                  ].map(({ label, action }) => (
-                    <button key={label} onClick={action} className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors" style={{ fontSize: 12, color: "var(--foreground)" }}>
-                      {label}
-                    </button>
-                  ))}
+                  <button className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors" style={{ fontSize: 12, color: "var(--foreground)" }}
+                    onClick={() => setProfileOpen(false)}>
+                    Account Settings
+                  </button>
                   <div style={{ borderTop: "1px solid var(--border)" }}>
-                    <button onClick={() => setProfileOpen(false)} className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors" style={{ fontSize: 12, color: "#DC2626" }}>
+                    <button
+                      onClick={() => { setProfileOpen(false); onSignOut(); }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors flex items-center gap-2"
+                      style={{ fontSize: 12, color: "#DC2626" }}
+                    >
+                      <LogOut size={12} strokeWidth={2} />
                       Sign Out
                     </button>
                   </div>
@@ -457,30 +441,35 @@ export default function App() {
           </div>
         </header>
 
-        {/* ── Employee mode ── */}
-        {appMode === "employee" && (
-          <div className="flex-1 flex items-center justify-center overflow-auto"
-            style={{ background: "#080806", padding: "40px 0", backgroundImage: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(163,230,53,0.04) 0%, transparent 70%)" }}>
-            <EmployeeView />
-          </div>
-        )}
-
-        {/* ── Employer views ── */}
-        {appMode === "employer" && (
-          <div className="flex flex-1 overflow-hidden">
-            {employerView === "pipeline" && <PipelineView onInitiateIntro={handleInitiateIntro} />}
-            {employerView === "matches" && <ActiveMatchesView onFastTrack={handleInitiateIntro} />}
-            {employerView === "roles" && <OpenRolesView />}
-            {employerView === "messages" && (
-              <EmployerChatbox
-                candidateName={chatIntroName}
-                prefilledMessage={chatPrefilledMsg}
-                onClose={() => setEmployerView("pipeline")}
-              />
-            )}
-          </div>
-        )}
+        {/* Employer views */}
+        <div className="flex flex-1 overflow-hidden">
+          {employerView === "pipeline" && <PipelineView onInitiateIntro={handleInitiateIntro} />}
+          {employerView === "matches" && <ActiveMatchesView onFastTrack={handleInitiateIntro} />}
+          {employerView === "roles" && <OpenRolesView />}
+          {employerView === "messages" && (
+            <EmployerChatbox
+              candidateName={chatIntroName}
+              prefilledMessage={chatPrefilledMsg}
+              onClose={() => setEmployerView("pipeline")}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
+}
+
+/* ─── Root App — auth router ─── */
+export default function App() {
+  const [authRole, setAuthRole] = useState<AuthRole | null>(null);
+
+  if (authRole === null) {
+    return <LoginPage onLogin={(role) => setAuthRole(role)} />;
+  }
+
+  if (authRole === "employee") {
+    return <EmployeeShell onSignOut={() => setAuthRole(null)} />;
+  }
+
+  return <EmployerShell onSignOut={() => setAuthRole(null)} />;
 }
