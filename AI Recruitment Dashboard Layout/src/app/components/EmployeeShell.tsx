@@ -298,7 +298,7 @@ export function EmployeeShell({ onSignOut }: Props) {
         >
           {isCoach ? (
             /* Coach: flex column fills full height */
-            <div className="h-full flex flex-col" style={{ maxWidth: 860, margin: "0 auto", padding: "32px 24px 32px" }}>
+            <div className="h-full flex flex-col" style={{ padding: "24px 28px 24px" }}>
               {/* Profile strip above chat */}
               <div
                 className="flex items-center justify-between px-5 py-3 rounded-t-2xl shrink-0"
@@ -327,9 +327,9 @@ export function EmployeeShell({ onSignOut }: Props) {
               </div>
             </div>
           ) : (
-            /* Other tabs: centered column with max-width, scrollable */
+            /* Other tabs: full-width scrollable */
             <div className="h-full overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-              <div style={{ maxWidth: 860, margin: "0 auto", padding: "32px 24px 40px" }}>
+              <div style={{ padding: "28px 28px 48px" }}>
                 {/* Desktop profile banner */}
                 <div
                   className="flex items-center justify-between px-5 py-3 rounded-2xl mb-4"
