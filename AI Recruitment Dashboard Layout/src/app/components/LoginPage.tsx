@@ -68,7 +68,7 @@ export function LoginPage({ onLogin }: Props) {
           <h1 style={{ fontSize: 64, fontWeight: 800, color: "#F5F5F5", lineHeight: 1.05, letterSpacing: "-0.04em", marginBottom: 24 }}>
             Navigate<br />work like a<br />trajectory,<br />not a<br />transaction.
           </h1>
-          <p style={{ fontSize: 17, color: "#71717A", lineHeight: 1.75, marginBottom: 40 }}>
+          <p style={{ fontSize: 20, color: "#71717A", lineHeight: 1.75, marginBottom: 40 }}>
             Nexus OS replaces the transactional job market with a continuous navigation framework — connecting real-time candidate velocity to employers who think in systems, not snapshots.
           </p>
 
@@ -80,8 +80,8 @@ export function LoginPage({ onLogin }: Props) {
               { value: "3.2×", label: "Faster hiring cycle" },
             ].map(({ value, label }) => (
               <div key={label} className="flex-1 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <p style={{ fontSize: 20, fontWeight: 800, color: "#F5F5F5", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em" }}>{value}</p>
-                <p style={{ fontSize: 10, color: "#52525B", marginTop: 3 }}>{label}</p>
+                <p style={{ fontSize: 30, fontWeight: 800, color: "#F5F5F5", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em" }}>{value}</p>
+                <p style={{ fontSize: 15, color: "#52525B", marginTop: 3 }}>{label}</p>
               </div>
             ))}
           </div>
