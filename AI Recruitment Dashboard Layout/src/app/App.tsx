@@ -3,6 +3,7 @@ import {
   Search, Bell, ChevronDown, SlidersHorizontal, ArrowUpDown,
   Filter, Sparkles, Building2, LayoutList, Zap, Briefcase,
   Settings, Brain, MessageSquareMore, ChevronRight, LogOut,
+  X, User, Shield, Bell as BellIcon, CreditCard, Moon, HelpCircle,
 } from "lucide-react";
 import { CandidateCard, type Candidate } from "./components/CandidateCard";
 import { InsightPanel } from "./components/InsightPanel";
@@ -85,8 +86,140 @@ const sidebarNav = [
   { id: "messages" as EmployerView, icon: MessageSquareMore, label: "Direct Introductions" },
 ];
 
+/* ─── Employer Settings Panel (slide-in drawer) ─── */
+function EmployerSettingsPanel({ open, onClose, onSignOut }: { open: boolean; onClose: () => void; onSignOut: () => void }) {
+  const [notifEnabled, setNotifEnabled] = useState(true);
+  const [matchAlerts, setMatchAlerts] = useState(true);
+
+  if (!open) return null;
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40"
+        style={{ background: "rgba(0,0,0,0.25)", backdropFilter: "blur(2px)" }}
+        onClick={onClose}
+      />
+      {/* Drawer */}
+      <div
+        className="fixed right-0 top-0 h-screen z-50 flex flex-col overflow-hidden"
+        style={{
+          width: 340,
+          background: "var(--card)",
+          borderLeft: "1px solid var(--border)",
+          boxShadow: "-16px 0 48px rgba(0,0,0,0.12)",
+          animation: "slideInRight 0.22s ease",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="flex items-center gap-2">
+            <Settings size={15} style={{ color: "var(--primary)" }} strokeWidth={2} />
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)" }}>Settings</span>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-accent transition-colors">
+            <X size={14} style={{ color: "var(--muted-foreground)" }} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+          {/* Profile section */}
+          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--font-mono)", marginBottom: 12 }}>Account</p>
+            <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "var(--accent)" }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white" style={{ background: "#7C5C4A", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 13 }}>AK</div>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Arjun Kumar</p>
+                <p style={{ fontSize: 11, color: "var(--muted-foreground)" }}>arjun@nexusos.io · Employer</p>
+              </div>
+            </div>
+            <button className="w-full mt-2 flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors" style={{ fontSize: 12, color: "var(--foreground)" }}>
+              <User size={13} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
+              Edit Profile
+            </button>
+          </div>
+
+          {/* Notifications */}
+          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--font-mono)", marginBottom: 12 }}>Notifications</p>
+            {[
+              { label: "Push notifications", sub: "Browser alerts for matches & messages", state: notifEnabled, toggle: setNotifEnabled },
+              { label: "Match alerts", sub: "Notify when new trajectory matches appear", state: matchAlerts, toggle: setMatchAlerts },
+            ].map(({ label, sub, state, toggle }) => (
+              <div key={label} className="flex items-center justify-between py-2.5">
+                <div>
+                  <p style={{ fontSize: 12, color: "var(--foreground)", fontWeight: 500 }}>{label}</p>
+                  <p style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 1 }}>{sub}</p>
+                </div>
+                <button
+                  onClick={() => toggle((p) => !p)}
+                  className="rounded-full transition-colors shrink-0"
+                  style={{ width: 36, height: 20, background: state ? "var(--primary)" : "var(--border)", position: "relative" }}
+                >
+                  <span
+                    className="absolute top-1 rounded-full transition-all"
+                    style={{ width: 12, height: 12, background: "#fff", left: state ? 21 : 3 }}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Workspace */}
+          <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "var(--font-mono)", marginBottom: 12 }}>Workspace</p>
+            {[
+              { icon: Building2, label: "Company profile", sub: "Nexus Corp · 120 employees" },
+              { icon: CreditCard, label: "Billing & plan", sub: "Growth plan · Renews Aug 1" },
+              { icon: Shield, label: "Security", sub: "SSO · 2FA enabled" },
+            ].map(({ icon: Icon, label, sub }) => (
+              <button key={label} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors text-left">
+                <Icon size={14} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
+                <div>
+                  <p style={{ fontSize: 12, color: "var(--foreground)", fontWeight: 500 }}>{label}</p>
+                  <p style={{ fontSize: 10, color: "var(--muted-foreground)" }}>{sub}</p>
+                </div>
+                <ChevronRight size={12} className="ml-auto" style={{ color: "var(--muted-foreground)" }} />
+              </button>
+            ))}
+          </div>
+
+          {/* Support */}
+          <div className="px-5 py-4">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors text-left">
+              <HelpCircle size={14} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
+              <span style={{ fontSize: 12, color: "var(--foreground)", fontWeight: 500 }}>Help & support</span>
+              <ChevronRight size={12} className="ml-auto" style={{ color: "var(--muted-foreground)" }} />
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-4 shrink-0" style={{ borderTop: "1px solid var(--border)" }}>
+          <button
+            onClick={() => { onClose(); onSignOut(); }}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors"
+            style={{ fontSize: 12, color: "#DC2626" }}
+          >
+            <LogOut size={13} strokeWidth={2} />
+            Sign out
+          </button>
+        </div>
+      </div>
+      <style>{`@keyframes slideInRight { from { transform: translateX(100%); opacity:0 } to { transform: translateX(0); opacity:1 } }`}</style>
+    </>
+  );
+}
+
 /* ─── Employer Sidebar ─── */
-function Sidebar({ activeView, onNav }: { activeView: EmployerView; onNav: (v: EmployerView) => void }) {
+function Sidebar({
+  activeView, onNav, onSettings, onProfile,
+}: {
+  activeView: EmployerView;
+  onNav: (v: EmployerView) => void;
+  onSettings: () => void;
+  onProfile: () => void;
+}) {
   return (
     <aside className="fixed left-0 top-0 h-screen w-16 flex flex-col items-center py-5 z-40"
       style={{ background: "var(--sidebar)", borderRight: "1px solid var(--sidebar-border)" }}>
@@ -114,14 +247,28 @@ function Sidebar({ activeView, onNav }: { activeView: EmployerView; onNav: (v: E
         })}
       </nav>
       <div className="flex flex-col items-center gap-1">
-        <button title="Settings" className="group relative w-10 h-10 rounded flex items-center justify-center transition-colors duration-150"
-          style={{ color: "var(--sidebar-foreground)" }}>
+        {/* Settings button — now wired */}
+        <button
+          title="Settings"
+          onClick={onSettings}
+          className="group relative w-10 h-10 rounded flex items-center justify-center transition-colors duration-150 hover:bg-accent"
+          style={{ color: "var(--sidebar-foreground)" }}
+        >
           <Settings size={18} strokeWidth={1.8} />
+          <span className="pointer-events-none absolute left-14 whitespace-nowrap rounded px-2 py-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity z-50"
+            style={{ background: "var(--sidebar-accent)", color: "var(--sidebar-accent-foreground)" }}>
+            Settings
+          </span>
         </button>
-        <div className="w-8 h-8 rounded-full flex items-center justify-center mt-3 text-xs"
-          style={{ background: "#3D342F", color: "var(--sidebar-foreground)", fontFamily: "var(--font-mono)" }}>
+        {/* Profile avatar — now wired */}
+        <button
+          title="Arjun Kumar · Profile"
+          onClick={onProfile}
+          className="w-8 h-8 rounded-full flex items-center justify-center mt-3 text-xs transition-opacity hover:opacity-75"
+          style={{ background: "#7C5C4A", color: "#fff", fontFamily: "var(--font-mono)", fontWeight: 700 }}
+        >
           AK
-        </div>
+        </button>
       </div>
     </aside>
   );
@@ -157,8 +304,8 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      {/* Left Column — 60% */}
-      <div className="flex flex-col overflow-hidden" style={{ width: "60%", borderRight: "1px solid var(--border)" }}>
+      {/* Left Column — flex-[3] grows to fill */}
+      <div className="flex flex-col overflow-hidden flex-[3]" style={{ borderRight: "1px solid var(--border)", minWidth: 0 }}>
         {/* Toolbar */}
         <div className="flex items-center justify-between px-5 shrink-0"
           style={{ borderBottom: "1px solid var(--border)", background: "var(--card)", height: "48px" }}>
@@ -285,8 +432,8 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
         </div>
       </div>
 
-      {/* Right Column — 40% */}
-      <div className="flex flex-col overflow-hidden" style={{ width: "40%", background: "var(--card)" }}>
+      {/* Right Column — flex-[2] grows to fill */}
+      <div className="flex flex-col overflow-hidden flex-[2]" style={{ background: "var(--card)", minWidth: 0 }}>
         <InsightPanel candidate={selectedCandidate} onInitiateIntro={onInitiateIntro} />
       </div>
     </div>
@@ -302,6 +449,7 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
   const [employerView, setEmployerView] = useState<EmployerView>("pipeline");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [chatIntroName, setChatIntroName] = useState<string | undefined>();
   const [chatPrefilledMsg, setChatPrefilledMsg] = useState<string | undefined>();
 
@@ -331,7 +479,19 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--background)", fontFamily: "var(--font-sans)" }}>
-      <Sidebar activeView={employerView} onNav={(v) => { setEmployerView(v); handleCloseChat(); }} />
+      <Sidebar
+        activeView={employerView}
+        onNav={(v) => { setEmployerView(v); handleCloseChat(); }}
+        onSettings={() => { setSettingsOpen(true); setNotifOpen(false); setProfileOpen(false); }}
+        onProfile={() => { setSettingsOpen(true); setNotifOpen(false); setProfileOpen(false); }}
+      />
+
+      {/* Settings drawer */}
+      <EmployerSettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onSignOut={onSignOut}
+      />
 
       <div className="flex flex-col flex-1 min-w-0 ml-16">
         {/* Top Header */}
@@ -422,7 +582,7 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
                     <p style={{ fontSize: 10, color: "var(--muted-foreground)" }}>arjun@nexusos.io</p>
                   </div>
                   <button className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors" style={{ fontSize: 12, color: "var(--foreground)" }}
-                    onClick={() => setProfileOpen(false)}>
+                    onClick={() => { setProfileOpen(false); setSettingsOpen(true); }}>
                     Account Settings
                   </button>
                   <div style={{ borderTop: "1px solid var(--border)" }}>
