@@ -14,7 +14,7 @@ import { LoginPage } from "./components/LoginPage";
 import { EmployeeShell } from "./components/EmployeeShell";
 
 type AuthRole = "employer" | "employee";
-type EmployerView = "pipeline" | "matches" | "roles" | "messages";
+type EmployerView = "pipeline" | "matches" | "roles" | "messages" | "notifications";
 
 const candidates: Candidate[] = [
   {
@@ -514,7 +514,6 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [mobileNotifOpen, setMobileNotifOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [chatIntroName, setChatIntroName] = useState<string | undefined>();
   const [chatPrefilledMsg, setChatPrefilledMsg] = useState<string | undefined>();
@@ -537,7 +536,6 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
     setEmployerView("messages");
     setNotifOpen(false);
     setProfileOpen(false);
-    setMobileNotifOpen(false);
     setMobileProfileOpen(false);
   };
 
@@ -551,6 +549,7 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
     matches: "Active Matches",
     roles: "Open Roles",
     messages: "Introductions",
+    notifications: "Notifications",
   };
 
   return (
@@ -704,6 +703,30 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
           {employerView === "messages" && (
             <EmployerChatbox candidateName={chatIntroName} prefilledMessage={chatPrefilledMsg} onClose={() => setEmployerView("pipeline")} />
           )}
+          {employerView === "notifications" && (
+            <div className="flex flex-col h-full overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
+                <div>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>Notifications</p>
+                  <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>{notifications.length} recent alerts</p>
+                </div>
+                <button onClick={markAllRead} style={{ fontSize: 11, color: "var(--primary)", fontWeight: 500 }}>Mark all read</button>
+              </div>
+              {/* List */}
+              <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 96 }}>
+                {notifications.map((n) => (
+                  <div key={n.id} className="flex items-start gap-4 px-4 py-4 hover:bg-accent transition-colors" style={{ borderBottom: "1px solid var(--border)" }}>
+                    <span className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ background: n.dot }} />
+                    <div className="flex-1">
+                      <p style={{ fontSize: 13, color: "var(--foreground)", lineHeight: 1.6 }}>{n.text}</p>
+                      <p style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginTop: 4 }}>{n.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Mobile Floating Bottom Nav ── */}
@@ -725,7 +748,7 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
               return (
                 <button
                   key={id}
-                  onClick={() => { setEmployerView(id); handleCloseChat(); setMobileNotifOpen(false); setMobileProfileOpen(false); }}
+                  onClick={() => { setEmployerView(id); handleCloseChat(); setMobileProfileOpen(false); }}
                   title={label}
                   className="flex items-center justify-center transition-all duration-150"
                   style={{
@@ -742,14 +765,14 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
             {/* Divider */}
             <div style={{ width: 1, height: 28, background: "var(--border)", margin: "0 4px" }} />
 
-            {/* Bell */}
+            {/* Bell — navigates to notifications tab */}
             <button
-              onClick={() => { setMobileNotifOpen((p) => !p); setMobileProfileOpen(false); markAllRead(); }}
+              onClick={() => { setEmployerView("notifications"); setMobileProfileOpen(false); markAllRead(); }}
               className="relative flex items-center justify-center transition-all duration-150"
               style={{
                 width: 48, height: 48, borderRadius: 999,
-                background: mobileNotifOpen ? "var(--sidebar-accent)" : "transparent",
-                color: mobileNotifOpen ? "var(--primary)" : "var(--muted-foreground)",
+                background: employerView === "notifications" ? "var(--sidebar-accent)" : "transparent",
+                color: employerView === "notifications" ? "var(--primary)" : "var(--muted-foreground)",
               }}
             >
               <Bell size={20} strokeWidth={1.8} />
@@ -763,7 +786,7 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
 
             {/* Profile */}
             <button
-              onClick={() => { setMobileProfileOpen((p) => !p); setMobileNotifOpen(false); }}
+              onClick={() => { setMobileProfileOpen((p) => !p); }}
               className="flex items-center justify-center transition-all duration-150"
               style={{ width: 48, height: 48, borderRadius: 999, background: mobileProfileOpen ? "var(--sidebar-accent)" : "transparent" }}
             >
@@ -773,33 +796,6 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
               </div>
             </button>
           </div>
-
-          {/* Mobile notification panel */}
-          {mobileNotifOpen && (
-            <div
-              className="absolute left-1/2 rounded-2xl overflow-hidden"
-              style={{ bottom: 72, transform: "translateX(-50%)", width: 320, background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 -8px 40px rgba(0,0,0,0.18)" }}
-            >
-              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>Notifications</p>
-                <button onClick={() => setMobileNotifOpen(false)}>
-                  <X size={14} style={{ color: "var(--muted-foreground)" }} />
-                </button>
-              </div>
-              {notifications.map((n) => (
-                <div key={n.id} className="flex items-start gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
-                  <span className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: n.dot }} />
-                  <div className="flex-1">
-                    <p style={{ fontSize: 12, color: "var(--foreground)", lineHeight: 1.5 }}>{n.text}</p>
-                    <p style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", marginTop: 2 }}>{n.time}</p>
-                  </div>
-                </div>
-              ))}
-              <button onClick={() => { markAllRead(); setMobileNotifOpen(false); }} className="w-full py-2.5 text-center" style={{ fontSize: 11, color: "var(--primary)", fontWeight: 500 }}>
-                Mark all as read
-              </button>
-            </div>
-          )}
 
           {/* Mobile profile panel */}
           {mobileProfileOpen && (
