@@ -62,13 +62,13 @@ export function LoginPage({ onLogin }: Props) {
 
         {/* Hero text */}
         <div className="relative px-10 pb-16">
-          <p style={{ fontSize: 11, color: "#C2622A", fontFamily: "var(--font-mono)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: "#C2622A", fontFamily: "var(--font-mono)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20 }}>
             The Career Navigation Platform
           </p>
-          <h1 style={{ fontSize: 36, fontWeight: 800, color: "#F5F5F5", lineHeight: 1.15, letterSpacing: "-0.03em", marginBottom: 16 }}>
+          <h1 style={{ fontSize: 52, fontWeight: 800, color: "#F5F5F5", lineHeight: 1.1, letterSpacing: "-0.04em", marginBottom: 20 }}>
             Navigate work<br />like a trajectory,<br />not a transaction.
           </h1>
-          <p style={{ fontSize: 14, color: "#71717A", lineHeight: 1.65, maxWidth: 360 }}>
+          <p style={{ fontSize: 16, color: "#71717A", lineHeight: 1.7, maxWidth: 400 }}>
             Nexus OS replaces the transactional job market with a continuous navigation framework — connecting real-time candidate velocity to employers who think in systems, not snapshots.
           </p>
 
