@@ -132,7 +132,7 @@ function EmployeeSettingsPanel({ open, onClose, onSignOut }: { open: boolean; on
   );
 }
 
-type EmployeeViewTab = "navigator" | "portfolio" | "coach" | "pay";
+type EmployeeViewTab = "navigator" | "portfolio" | "coach" | "pay" | "notifications";
 
 const sidebarNav: { id: EmployeeViewTab; icon: typeof Compass; label: string }[] = [
   { id: "navigator", icon: Compass, label: "Career Navigator" },
@@ -146,6 +146,7 @@ const breadcrumbs: Record<EmployeeViewTab, string> = {
   portfolio: "My Portfolio",
   coach: "AI Coach",
   pay: "Pay Engine",
+  notifications: "Notifications",
 };
 
 const employeeNotifications = [
@@ -165,11 +166,11 @@ export function EmployeeShell({ onSignOut }: Props) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
-  const [mobileNotifOpen, setMobileNotifOpen] = useState(false);
   const [readNotifs, setReadNotifs] = useState<Set<string>>(new Set());
 
   const unreadCount = employeeNotifications.filter((n) => !readNotifs.has(n.id)).length;
   const isCoach = activeView === "coach";
+  const isMobileNotifications = activeView === "notifications";
 
   const markAllRead = () => setReadNotifs(new Set(employeeNotifications.map((n) => n.id)));
 
@@ -573,6 +574,35 @@ export function EmployeeShell({ onSignOut }: Props) {
               {activeView === "portfolio" && <PortfolioTab />}
               {activeView === "coach" && <CoachTab />}
               {activeView === "pay" && <PayTab />}
+              {activeView === "notifications" && (
+                <div style={{ paddingBottom: 24 }}>
+                  <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: "#F5F5F5" }}>Notifications</p>
+                      <p style={{ fontSize: 11, color: "#52525B", marginTop: 2 }}>{employeeNotifications.length} recent alerts</p>
+                    </div>
+                    <button
+                      onClick={markAllRead}
+                      style={{ fontSize: 11, color: "#A3E635", fontWeight: 500 }}
+                    >
+                      Mark all read
+                    </button>
+                  </div>
+                  {employeeNotifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className="flex items-start gap-4 px-5 py-4"
+                      style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                    >
+                      <span className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ background: n.dot }} />
+                      <div className="flex-1">
+                        <p style={{ fontSize: 13, color: "#D4D4D8", lineHeight: 1.6 }}>{n.text}</p>
+                        <p style={{ fontSize: 11, color: "#52525B", fontFamily: "var(--font-mono)", marginTop: 4 }}>{n.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -599,7 +629,7 @@ export function EmployeeShell({ onSignOut }: Props) {
               return (
                 <button
                   key={id}
-                  onClick={() => { setActiveView(id); setMobileNotifOpen(false); setMobileProfileOpen(false); }}
+                  onClick={() => { setActiveView(id); setMobileProfileOpen(false); }}
                   title={label}
                   className="flex flex-col items-center justify-center transition-all duration-150"
                   style={{
@@ -618,16 +648,16 @@ export function EmployeeShell({ onSignOut }: Props) {
             {/* Divider */}
             <div style={{ width: 1, height: 28, background: "rgba(255,255,255,0.08)", margin: "0 4px" }} />
 
-            {/* Bell */}
+            {/* Bell — navigates to notifications tab */}
             <button
-              onClick={() => { setMobileNotifOpen((p) => !p); setMobileProfileOpen(false); markAllRead(); }}
+              onClick={() => { setActiveView("notifications"); setMobileProfileOpen(false); markAllRead(); }}
               className="flex flex-col items-center justify-center relative transition-all duration-150"
               style={{
                 width: 48,
                 height: 48,
                 borderRadius: 999,
-                background: mobileNotifOpen ? "rgba(163,230,53,0.10)" : "transparent",
-                color: mobileNotifOpen ? "#A3E635" : "#52525B",
+                background: isMobileNotifications ? "rgba(163,230,53,0.10)" : "transparent",
+                color: isMobileNotifications ? "#A3E635" : "#52525B",
               }}
             >
               <Bell size={20} strokeWidth={1.8} />
@@ -643,7 +673,7 @@ export function EmployeeShell({ onSignOut }: Props) {
 
             {/* Profile */}
             <button
-              onClick={() => { setMobileProfileOpen((p) => !p); setMobileNotifOpen(false); }}
+              onClick={() => { setMobileProfileOpen((p) => !p); }}
               className="flex flex-col items-center justify-center transition-all duration-150"
               style={{
                 width: 48,
@@ -661,48 +691,6 @@ export function EmployeeShell({ onSignOut }: Props) {
               </div>
             </button>
           </div>
-
-          {/* Mobile notification panel — floats above nav */}
-          {mobileNotifOpen && (
-            <div
-              className="absolute left-1/2 rounded-2xl overflow-hidden"
-              style={{
-                bottom: 72,
-                transform: "translateX(-50%)",
-                width: 320,
-                background: "#111",
-                border: "1px solid rgba(255,255,255,0.10)",
-                boxShadow: "0 -8px 40px rgba(0,0,0,0.8)",
-              }}
-            >
-              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "#F5F5F5" }}>Notifications</p>
-                <button onClick={() => setMobileNotifOpen(false)}>
-                  <X size={14} style={{ color: "#52525B" }} />
-                </button>
-              </div>
-              {employeeNotifications.map((n) => (
-                <div
-                  key={n.id}
-                  className="flex items-start gap-3 px-4 py-3"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-                >
-                  <span className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: n.dot }} />
-                  <div className="flex-1">
-                    <p style={{ fontSize: 12, color: "#D4D4D8", lineHeight: 1.5 }}>{n.text}</p>
-                    <p style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)", marginTop: 2 }}>{n.time}</p>
-                  </div>
-                </div>
-              ))}
-              <button
-                onClick={() => { markAllRead(); setMobileNotifOpen(false); }}
-                className="w-full py-2.5 text-center"
-                style={{ fontSize: 11, color: "#A3E635", fontWeight: 500 }}
-              >
-                Dismiss all
-              </button>
-            </div>
-          )}
 
           {/* Mobile profile panel — floats above nav */}
           {mobileProfileOpen && (
