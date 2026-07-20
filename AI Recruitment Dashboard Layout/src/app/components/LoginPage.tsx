@@ -35,7 +35,7 @@ export function LoginPage({ onLogin }: Props) {
     >
       {/* ── Left panel — ambient art ── */}
       <div
-        className="hidden lg:flex flex-col justify-between relative overflow-hidden"
+        className="hidden lg:flex flex-col justify-center relative overflow-hidden"
         style={{ width: "44%", background: "linear-gradient(145deg, #0E0C14 0%, #140F1E 50%, #0C1018 100%)" }}
       >
         {/* Radial glows */}
@@ -49,8 +49,8 @@ export function LoginPage({ onLogin }: Props) {
           backgroundSize: "40px 40px",
         }} />
 
-        {/* Logo */}
-        <div className="relative px-10 pt-10 flex items-center gap-3">
+        {/* Logo — absolute so it doesn't shift centered content */}
+        <div className="absolute top-10 left-10 flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(194,98,42,0.15)", border: "1px solid rgba(194,98,42,0.3)" }}>
             <Brain size={18} style={{ color: "#C2622A" }} strokeWidth={2} />
           </div>
@@ -60,31 +60,38 @@ export function LoginPage({ onLogin }: Props) {
           </div>
         </div>
 
-        {/* Hero text */}
-        <div className="relative px-10 pb-16">
-          <p style={{ fontSize: 13, color: "#C2622A", fontFamily: "var(--font-mono)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20 }}>
+        {/* Hero text — vertically centered, 70% of panel width */}
+        <div className="relative mx-auto" style={{ width: "70%" }}>
+          <p style={{ fontSize: 12, color: "#C2622A", fontFamily: "var(--font-mono)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 24 }}>
             The Career Navigation Platform
           </p>
-          <h1 style={{ fontSize: 52, fontWeight: 800, color: "#F5F5F5", lineHeight: 1.1, letterSpacing: "-0.04em", marginBottom: 20 }}>
-            Navigate work<br />like a trajectory,<br />not a transaction.
+          <h1 style={{ fontSize: 64, fontWeight: 800, color: "#F5F5F5", lineHeight: 1.05, letterSpacing: "-0.04em", marginBottom: 24 }}>
+            Navigate<br />work like a<br />trajectory,<br />not a<br />transaction.
           </h1>
-          <p style={{ fontSize: 16, color: "#71717A", lineHeight: 1.7, maxWidth: 400 }}>
+          <p style={{ fontSize: 17, color: "#71717A", lineHeight: 1.75, marginBottom: 40 }}>
             Nexus OS replaces the transactional job market with a continuous navigation framework — connecting real-time candidate velocity to employers who think in systems, not snapshots.
           </p>
 
-          {/* Stat pills */}
-          <div className="flex gap-3 mt-8">
+          {/* Stat pills — stretch to fill 70% column */}
+          <div className="flex gap-3">
             {[
               { value: "94%", label: "Match accuracy" },
               { value: "12k+", label: "Trajectories mapped" },
               { value: "3.2×", label: "Faster hiring cycle" },
             ].map(({ value, label }) => (
-              <div key={label} className="rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <p style={{ fontSize: 18, fontWeight: 800, color: "#F5F5F5", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em" }}>{value}</p>
-                <p style={{ fontSize: 10, color: "#52525B", marginTop: 2 }}>{label}</p>
+              <div key={label} className="flex-1 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p style={{ fontSize: 20, fontWeight: 800, color: "#F5F5F5", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em" }}>{value}</p>
+                <p style={{ fontSize: 10, color: "#52525B", marginTop: 3 }}>{label}</p>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Bottom tagline */}
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+          <p style={{ fontSize: 10, color: "#27272A", fontFamily: "var(--font-mono)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            Nexus OS · Career Navigation Platform · Beta
+          </p>
         </div>
       </div>
 
