@@ -4,6 +4,7 @@ import {
   Compass, FolderOpen, MessageSquare, DollarSign,
   LogOut, ShieldCheck, Sparkles, X, TrendingUp,
   User, CreditCard, Shield, HelpCircle,
+  Moon, Sun
 } from "lucide-react";
 import { NavigatorTab, PortfolioTab, CoachTab, PayTab } from "./EmployeeView";
 
@@ -33,7 +34,7 @@ function EmployeeSettingsPanel({ open, onClose, onSignOut }: { open: boolean; on
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center gap-2">
-            <Settings size={15} style={{ color: "#A3E635" }} strokeWidth={2} />
+            <Settings size={15} style={{ color: "var(--accent-highlight)" }} strokeWidth={2} />
             <span style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5" }}>Settings</span>
           </div>
           <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -50,7 +51,7 @@ function EmployeeSettingsPanel({ open, onClose, onSignOut }: { open: boolean; on
               <div>
                 <div className="flex items-center gap-1.5">
                   <p style={{ fontSize: 13, fontWeight: 600, color: "#F5F5F5" }}>Jordan Park</p>
-                  <ShieldCheck size={12} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+                  <ShieldCheck size={12} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
                 </div>
                 <p style={{ fontSize: 11, color: "#52525B" }}>jordan@nexusos.io · Candidate</p>
               </div>
@@ -76,7 +77,7 @@ function EmployeeSettingsPanel({ open, onClose, onSignOut }: { open: boolean; on
                 <button
                   onClick={() => toggle((p) => !p)}
                   className="rounded-full transition-colors shrink-0"
-                  style={{ width: 36, height: 20, background: state ? "#A3E635" : "#27272A", position: "relative" }}
+                  style={{ width: 36, height: 20, background: state ? "var(--accent-highlight)" : "var(--border)", position: "relative" }}
                 >
                   <span
                     className="absolute top-1 rounded-full transition-all"
@@ -158,9 +159,11 @@ const employeeNotifications = [
 
 interface Props {
   onSignOut: () => void;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
 }
 
-export function EmployeeShell({ onSignOut }: Props) {
+export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
   const [activeView, setActiveView] = useState<EmployeeViewTab>("navigator");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -205,7 +208,7 @@ export function EmployeeShell({ onSignOut }: Props) {
       <button
         onClick={() => { markAllRead(); onClose(); }}
         className="w-full py-2.5 text-center"
-        style={{ fontSize: 11, color: "#A3E635", fontWeight: 500 }}
+        style={{ fontSize: 11, color: "var(--accent-highlight)", fontWeight: 500 }}
       >
         Dismiss all
       </button>
@@ -226,7 +229,7 @@ export function EmployeeShell({ onSignOut }: Props) {
       <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="flex items-center gap-2">
           <p style={{ fontSize: 13, fontWeight: 600, color: "#F5F5F5" }}>Jordan Park</p>
-          <ShieldCheck size={12} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+          <ShieldCheck size={12} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
         </div>
         <p style={{ fontSize: 10, color: "#52525B" }}>jordan@nexusos.io</p>
       </div>
@@ -254,7 +257,7 @@ export function EmployeeShell({ onSignOut }: Props) {
   return (
     <div
       className="flex h-screen overflow-hidden"
-      style={{ background: "#080806", fontFamily: "var(--font-sans)" }}
+      style={{ background: "var(--background)", fontFamily: "var(--font-sans)" }}
     >
       {/* Settings drawer */}
       <EmployeeSettingsPanel
@@ -269,7 +272,7 @@ export function EmployeeShell({ onSignOut }: Props) {
       {/* ── Desktop Sidebar ── */}
       <aside
         className="hidden lg:flex fixed left-0 top-0 h-screen w-16 flex-col items-center py-5 z-40"
-        style={{ background: "#0A0A0A", borderRight: "1px solid rgba(255,255,255,0.07)" }}
+        style={{ background: "var(--card)", borderRight: "1px solid var(--border)" }}
       >
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-1">
@@ -277,7 +280,7 @@ export function EmployeeShell({ onSignOut }: Props) {
             className="w-8 h-8 rounded-lg flex items-center justify-center"
             style={{ background: "rgba(163,230,53,0.12)", border: "1px solid rgba(163,230,53,0.25)" }}
           >
-            <Brain size={16} style={{ color: "#A3E635" }} strokeWidth={2} />
+            <Brain size={16} style={{ color: "var(--accent-highlight)" }} strokeWidth={2} />
           </div>
         </div>
 
@@ -293,14 +296,14 @@ export function EmployeeShell({ onSignOut }: Props) {
                 className="group relative w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-150"
                 style={{
                   background: active ? "rgba(163,230,53,0.10)" : "transparent",
-                  color: active ? "#A3E635" : "#52525B",
+                  color: active ? "var(--accent-highlight)" : "#8E8E93",
                 }}
               >
                 <Icon size={18} strokeWidth={active ? 2.2 : 1.8} />
                 {active && (
                   <span
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r"
-                    style={{ background: "#A3E635" }}
+                    style={{ background: "var(--accent-highlight)" }}
                   />
                 )}
                 <span
@@ -321,7 +324,7 @@ export function EmployeeShell({ onSignOut }: Props) {
             title="Settings"
             onClick={() => setSettingsOpen(true)}
             className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-            style={{ color: settingsOpen ? "#A3E635" : "#3F3F46", background: settingsOpen ? "rgba(163,230,53,0.08)" : "transparent" }}
+            style={{ color: settingsOpen ? "var(--accent-highlight)" : "#8E8E93", background: settingsOpen ? "var(--accent-highlight-bg)" : "transparent" }}
           >
             <Settings size={17} strokeWidth={1.8} />
           </button>
@@ -343,16 +346,16 @@ export function EmployeeShell({ onSignOut }: Props) {
         <header
           className="flex items-center gap-4 px-6 shrink-0 relative"
           style={{
-            background: "rgba(10,10,10,0.97)",
-            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            background: "var(--card)",
+            borderBottom: "1px solid var(--border)",
             height: "52px",
             zIndex: 30,
             backdropFilter: "blur(12px)",
           }}
         >
           <div className="flex items-center gap-2 mr-4 shrink-0">
-            <Sparkles size={14} style={{ color: "#A3E635" }} />
-            <span style={{ fontWeight: 600, fontSize: "13px", color: "#F5F5F5", letterSpacing: "-0.01em" }}>
+            <Sparkles size={14} style={{ color: "var(--accent-highlight)" }} />
+            <span style={{ fontWeight: 600, fontSize: "13px", color: "var(--foreground)", letterSpacing: "-0.01em" }}>
               Nexus OS
             </span>
             <span className="rounded px-1.5 py-0.5" style={{ background: "rgba(163,230,53,0.08)", color: "#52525B", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 500 }}>
@@ -360,21 +363,29 @@ export function EmployeeShell({ onSignOut }: Props) {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5" style={{ fontSize: "12px", color: "#52525B" }}>
+          <div className="flex items-center gap-1.5" style={{ fontSize: "12px", color: "var(--muted-foreground)" }}>
             <span>Workspace</span>
             <span>/</span>
-            <span style={{ color: "#A1A1AA" }}>{breadcrumbs[activeView]}</span>
+            <span style={{ color: "var(--foreground)" }}>{breadcrumbs[activeView]}</span>
           </div>
 
           {/* Profile identity strip */}
           <div className="hidden xl:flex items-center gap-2 ml-6">
-            <span className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: "rgba(163,230,53,0.08)", border: "1px solid rgba(163,230,53,0.15)", fontSize: 10, color: "#A3E635", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} />
+            <span className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)", fontSize: 10, color: "var(--accent-highlight)", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} />
               LIVING PORTFOLIO · ACTIVE
             </span>
           </div>
 
           <div className="flex items-center gap-2 ml-auto shrink-0">
+            <button
+              onClick={onToggleTheme}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+              style={{ color: "#A1A1AA" }}
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === "dark" ? <Sun size={15} strokeWidth={1.8} /> : <Moon size={15} strokeWidth={1.8} />}
+            </button>
             {/* Bell */}
             <button
               onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); markAllRead(); }}
@@ -385,7 +396,7 @@ export function EmployeeShell({ onSignOut }: Props) {
               {unreadCount > 0 && (
                 <span
                   className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                  style={{ background: "#A3E635", fontSize: "8px", fontFamily: "var(--font-mono)", color: "#000", fontWeight: 700 }}
+                  style={{ background: "var(--accent-highlight)", fontSize: "8px", fontFamily: "var(--font-mono)", color: "var(--primary-foreground)", fontWeight: 700 }}
                 >
                   {unreadCount}
                 </span>
@@ -428,7 +439,7 @@ export function EmployeeShell({ onSignOut }: Props) {
         <div
           className="flex-1 overflow-hidden"
           style={{
-            background: "#080806",
+            background: "var(--background)",
             backgroundImage: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(163,230,53,0.025) 0%, transparent 60%)",
           }}
         >
@@ -438,16 +449,16 @@ export function EmployeeShell({ onSignOut }: Props) {
               {/* Profile strip above chat */}
               <div
                 className="flex items-center justify-between px-5 py-3 rounded-t-2xl shrink-0"
-                style={{ background: "#0F0F0F", border: "1px solid rgba(255,255,255,0.07)", borderBottom: "none" }}
+                style={{ background: "var(--card)", border: "1px solid var(--border)", borderBottom: "none" }}
               >
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3730A3, #7C3AED)", fontSize: 11, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono)" }}>JP</div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5" }}>Jordan Park</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>Jordan Park</span>
                       <ShieldCheck size={12} style={{ color: "#A3E635" }} strokeWidth={2.5} />
                     </div>
-                    <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>Senior AI Career Coach · Private session</span>
+                    <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>Senior AI Career Coach · Private session</span>
                   </div>
                 </div>
                 <span className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: "rgba(163,230,53,0.08)", border: "1px solid rgba(163,230,53,0.15)", fontSize: 10, color: "#A3E635", fontWeight: 600, fontFamily: "var(--font-mono)" }}>
@@ -457,7 +468,7 @@ export function EmployeeShell({ onSignOut }: Props) {
               </div>
               <div
                 className="flex-1 overflow-hidden rounded-b-2xl"
-                style={{ background: "#0A0A0A", border: "1px solid rgba(255,255,255,0.07)", borderTop: "none" }}
+                style={{ background: "var(--background)", border: "1px solid var(--border)", borderTop: "none" }}
               >
                 <CoachTab />
               </div>
@@ -469,16 +480,16 @@ export function EmployeeShell({ onSignOut }: Props) {
                 {/* Desktop profile banner */}
                 <div
                   className="flex items-center justify-between px-5 py-3 rounded-2xl mb-4"
-                  style={{ background: "#0F0F0F", border: "1px solid rgba(255,255,255,0.07)" }}
+                  style={{ background: "var(--card)", border: "1px solid var(--border)" }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3730A3, #7C3AED)", fontSize: 12, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono)" }}>JP</div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>Jordan Park</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>Jordan Park</span>
                         <ShieldCheck size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} />
                       </div>
-                      <span style={{ fontSize: 11, color: "#52525B" }}>Sr. Portfolio Optimization Specialist · Independent</span>
+                      <span style={{ fontSize: 11, color: "var(--muted-foreground)" }}>Sr. Portfolio Optimization Specialist · Independent</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -496,7 +507,7 @@ export function EmployeeShell({ onSignOut }: Props) {
                 {/* Tab content — full width */}
                 <div
                   className="rounded-2xl overflow-hidden"
-                  style={{ background: "#0A0A0A", border: "1px solid rgba(255,255,255,0.07)" }}
+                  style={{ background: "var(--background)", border: "1px solid var(--border)" }}
                 >
                   {activeView === "navigator" && <NavigatorTab />}
                   {activeView === "portfolio" && <PortfolioTab />}

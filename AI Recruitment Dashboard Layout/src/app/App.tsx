@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search, Bell, ChevronDown, SlidersHorizontal, ArrowUpDown,
   Filter, Sparkles, Building2, LayoutList, Zap, Briefcase,
   Settings, Brain, MessageSquareMore, ChevronRight, LogOut,
   X, User, Shield, CreditCard, HelpCircle, ArrowLeft,
+  Moon, Sun
 } from "lucide-react";
 import { CandidateCard, type Candidate } from "./components/CandidateCard";
 import { InsightPanel } from "./components/InsightPanel";
@@ -16,8 +17,16 @@ import { EmployeeShell } from "./components/EmployeeShell";
 import { CareerOSApplicationShell, MockInitializer } from "../../../src";
 
 export const shell = new CareerOSApplicationShell();
-const initResult = MockInitializer.initializeDemoState(shell);
-const candidates: Candidate[] = initResult.candidatesList;
+export let initError: string | null = null;
+let candidates: Candidate[] = [];
+
+try {
+  const initResult = MockInitializer.initializeDemoState(shell);
+  candidates = initResult.candidatesList;
+} catch (e: any) {
+  initError = e.stack || e.message || String(e);
+  console.error("Initialization Error:", e);
+}
 
 type AuthRole = "employer" | "employee";
 type EmployerView = "pipeline" | "matches" | "roles" | "messages" | "notifications";
@@ -467,9 +476,13 @@ function MobilePipelineView({ onInitiateIntro }: PipelineProps) {
 }
 
 /* ─── Employer Shell ─── */
-interface EmployerShellProps { onSignOut: () => void; }
+interface EmployerShellProps {
+  onSignOut: () => void;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
+}
 
-function EmployerShell({ onSignOut }: EmployerShellProps) {
+function EmployerShell({ onSignOut, theme, onToggleTheme }: EmployerShellProps) {
   const [employerView, setEmployerView] = useState<EmployerView>("pipeline");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -550,6 +563,14 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
               </div>
             )}
             <div className="flex items-center gap-2 ml-auto shrink-0">
+              <button
+                onClick={onToggleTheme}
+                className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-accent"
+                style={{ color: "var(--muted-foreground)" }}
+                title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {theme === "dark" ? <Sun size={15} strokeWidth={1.8} /> : <Moon size={15} strokeWidth={1.8} />}
+              </button>
               <button id="bell-btn" onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); markAllRead(); }}
                 className="relative w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-accent">
                 <Bell size={15} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
@@ -793,11 +814,76 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
   );
 }
 
+import React from "react";
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 24, color: "#DC2626", background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 8, margin: 24, fontFamily: "monospace" }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>React Render Crash</h3>
+          <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.5 }}>{this.state.error?.stack || this.state.error?.message}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /* ─── Root App — auth router ─── */
 export default function App() {
   const [authRole, setAuthRole] = useState<AuthRole | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
-  if (authRole === null) return <LoginPage onLogin={(role) => setAuthRole(role)} />;
-  if (authRole === "employee") return <EmployeeShell onSignOut={() => setAuthRole(null)} />;
-  return <EmployerShell onSignOut={() => setAuthRole(null)} />;
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+
+  if (initError) {
+    return (
+      <div style={{ padding: 24, color: "#DC2626", background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 8, margin: 24, fontFamily: "monospace" }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>NexusOS Startup Error</h3>
+        <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.5 }}>{initError}</pre>
+      </div>
+    );
+  }
+
+  return (
+    <ErrorBoundary>
+      {authRole === null && <LoginPage onLogin={(role) => setAuthRole(role)} />}
+      {authRole === "employee" && (
+        <EmployeeShell
+          onSignOut={() => setAuthRole(null)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      )}
+      {authRole === "employer" && (
+        <EmployerShell
+          onSignOut={() => setAuthRole(null)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      )}
+    </ErrorBoundary>
+  );
 }

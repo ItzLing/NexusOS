@@ -201,7 +201,7 @@ export class MockInitializer {
                 trajectoryScore: matchPercentage,
                 trajectoryLabel: justification.capabilitySynthesisText,
                 momentum: raw.momentum,
-                phase: raw.primaryRole.title, // Map phase label to matching target role listing title
+                phase: candidateObj.phase, // Map phase label correctly to avoid UI crash
                 skills: ner.skills,
                 location: raw.loc,
                 yearsExp: raw.exp,

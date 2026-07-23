@@ -160,7 +160,7 @@ export function InsightPanel({ candidate, justification, onInitiateIntro }: Prop
               AI Trajectory Justification
             </span>
           </div>
-          <div className="rounded-lg overflow-hidden" style={{ background: "#FFF8F3", border: "1px solid rgba(194,98,42,0.15)" }}>
+          <div className="rounded-lg overflow-hidden" style={{ background: "var(--accent)", border: "1px solid var(--border)" }}>
 
             {insight.justificationPoints.map((point, i) => (
               <div
@@ -173,7 +173,7 @@ export function InsightPanel({ candidate, justification, onInitiateIntro }: Prop
                   <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     {point.label}
                   </span>
-                  <p style={{ fontSize: "12px", color: "#3B2A20", lineHeight: 1.6, marginTop: 2 }}>
+                  <p style={{ fontSize: "12px", color: "var(--foreground)", lineHeight: 1.6, marginTop: 2 }}>
                     {point.text}
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export function InsightPanel({ candidate, justification, onInitiateIntro }: Prop
               </thead>
               <tbody>
                 {insight.tradeOffs.map((row, i) => (
-                  <tr key={i} style={{ borderTop: "1px solid var(--border)", background: i % 2 === 0 ? "#fff" : "#FAFAF9" }}>
+                  <tr key={i} style={{ borderTop: "1px solid var(--border)", background: i % 2 === 0 ? "var(--card)" : "var(--background)" }}>
                     <td className="px-3 py-2.5" style={{ color: "var(--foreground)" }}>
                       <span className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: "#2D6A4F" }} />

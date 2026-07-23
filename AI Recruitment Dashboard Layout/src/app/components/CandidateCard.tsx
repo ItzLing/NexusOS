@@ -45,7 +45,7 @@ export function CandidateCard({ candidate, selected, onClick }: Props) {
       onClick={onClick}
       className="w-full text-left rounded-lg transition-all duration-150 group relative"
       style={{
-        background: selected ? "#FFFFFF" : "transparent",
+        background: selected ? "var(--selected-card-background)" : "transparent",
         border: selected ? "1.5px solid var(--primary)" : "1.5px solid transparent",
         padding: "14px 16px",
         boxShadow: selected ? "0 1px 8px rgba(194,98,42,0.10)" : "none",

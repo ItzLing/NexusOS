@@ -130,7 +130,7 @@ const promptShortcuts = [
 ];
 
 const routeColors: Record<string, { dot: string; bg: string; text: string }> = {
-  A: { dot: "#A3E635", bg: "rgba(163,230,53,0.08)", text: "#A3E635" },
+  A: { dot: "var(--accent-highlight)", bg: "var(--accent-highlight-bg)", text: "var(--accent-highlight)" },
   B: { dot: "#38BDF8", bg: "rgba(56,189,248,0.08)", text: "#38BDF8" },
   C: { dot: "#F472B6", bg: "rgba(244,114,182,0.08)", text: "#F472B6" },
 };
@@ -158,7 +158,7 @@ function PortfolioDetail({ sample, onClose }: { sample: PortfolioSample; onClose
         <div className="flex-1">
           <div className="flex items-center gap-1.5">
             <span style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{sample.title}</span>
-            {sample.verified && <CheckCircle2 size={12} style={{ color: "#A3E635" }} strokeWidth={2.5} />}
+            {sample.verified && <CheckCircle2 size={12} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />}
           </div>
           <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{sample.subtitle}</p>
         </div>
@@ -182,9 +182,9 @@ function PortfolioDetail({ sample, onClose }: { sample: PortfolioSample; onClose
           <p style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.1em", fontFamily: "var(--font-mono)", textTransform: "uppercase", marginBottom: 8 }}>
             Key Achievement
           </p>
-          <div className="rounded-xl p-4" style={{ background: "rgba(163,230,53,0.05)", border: "1px solid rgba(163,230,53,0.15)" }}>
+          <div className="rounded-xl p-4" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
             <div className="flex gap-2">
-              <Award size={15} style={{ color: "#A3E635", marginTop: 1, flexShrink: 0 }} strokeWidth={2} />
+              <Award size={15} style={{ color: "var(--accent-highlight)", marginTop: 1, flexShrink: 0 }} strokeWidth={2} />
               <p style={{ fontSize: 13, color: "#D4D4D8", lineHeight: 1.65 }}>{sample.achievement}</p>
             </div>
           </div>
@@ -220,10 +220,10 @@ function PortfolioDetail({ sample, onClose }: { sample: PortfolioSample; onClose
         </section>
 
         {/* Verification */}
-        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "rgba(163,230,53,0.04)", border: "1px solid rgba(163,230,53,0.12)" }}>
-          <ShieldCheck size={15} style={{ color: "#A3E635", flexShrink: 0 }} strokeWidth={2} />
+        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
+          <ShieldCheck size={15} style={{ color: "var(--accent-highlight)", flexShrink: 0 }} strokeWidth={2} />
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#A3E635" }}>Career OS Verified</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "var(--accent-highlight)" }}>Career OS Verified</p>
             <p style={{ fontSize: 10, color: "#52525B", marginTop: 1 }}>Verified {sample.age} · Cryptographic proof of work on file</p>
           </div>
         </div>
@@ -316,7 +316,7 @@ const employers: Employer[] = [
 ];
 
 const fitColors = (score: number) => {
-  if (score >= 90) return { text: "#A3E635", bg: "rgba(163,230,53,0.10)" };
+  if (score >= 90) return { text: "var(--accent-highlight)", bg: "var(--accent-highlight-bg)" };
   if (score >= 80) return { text: "#38BDF8", bg: "rgba(56,189,248,0.08)" };
   if (score >= 70) return { text: "#F472B6", bg: "rgba(244,114,182,0.08)" };
   return { text: "#71717A", bg: "rgba(113,113,122,0.08)" };
@@ -343,7 +343,7 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col z-30" style={{ background: "#0A0A0A", borderRadius: "inherit" }}>
+    <div className="absolute inset-0 flex flex-col z-30" style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "inherit" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-14 pb-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -363,7 +363,7 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
         {(["message", "resume"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className="flex items-center gap-1.5 rounded-lg px-4 py-2 flex-1 justify-center transition-colors"
-            style={{ background: tab === t ? "rgba(163,230,53,0.12)" : "rgba(255,255,255,0.04)", border: tab === t ? "1px solid rgba(163,230,53,0.3)" : "1px solid rgba(255,255,255,0.06)", fontSize: 12, fontWeight: tab === t ? 600 : 400, color: tab === t ? "#A3E635" : "#71717A" }}>
+            style={{ background: tab === t ? "var(--accent-highlight-bg)" : "var(--accent)", border: tab === t ? "1px solid var(--accent-highlight-border)" : "1px solid var(--border)", fontSize: 12, fontWeight: tab === t ? 600 : 400, color: tab === t ? "var(--accent-highlight)" : "var(--muted-foreground)" }}>
             {t === "message" ? <MessageSquare size={13} strokeWidth={2} /> : <FileText size={13} strokeWidth={2} />}
             {t === "message" ? "Direct Message" : "Send Resume"}
           </button>
@@ -375,10 +375,10 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
         {tab === "message" && (
           <>
             {/* Context card */}
-            <div className="rounded-xl p-3" style={{ background: "rgba(163,230,53,0.05)", border: "1px solid rgba(163,230,53,0.15)" }}>
+            <div className="rounded-xl p-3" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
               <div className="flex items-center gap-1.5 mb-1">
-                <Sparkles size={11} style={{ color: "#A3E635" }} strokeWidth={2.5} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#A3E635", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>AI-drafted · Trajectory-aware</span>
+                <Sparkles size={11} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
+                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--accent-highlight)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>AI-drafted · Trajectory-aware</span>
               </div>
               <p style={{ fontSize: 11, color: "#A1A1AA", lineHeight: 1.55 }}>{employer.whyYou}</p>
             </div>
@@ -398,9 +398,9 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
             {/* Attach resume toggle */}
             <button onClick={() => setResumeAttached((p) => !p)}
               className="flex items-center gap-2 rounded-lg px-3 py-2.5 w-full"
-              style={{ background: resumeAttached ? "rgba(163,230,53,0.08)" : "rgba(255,255,255,0.04)", border: resumeAttached ? "1px solid rgba(163,230,53,0.25)" : "1px solid rgba(255,255,255,0.07)" }}>
-              <Paperclip size={13} style={{ color: resumeAttached ? "#A3E635" : "#71717A" }} strokeWidth={2} />
-              <span style={{ fontSize: 12, color: resumeAttached ? "#A3E635" : "#71717A", fontWeight: resumeAttached ? 600 : 400 }}>
+              style={{ background: resumeAttached ? "var(--accent-highlight-bg)" : "var(--accent)", border: resumeAttached ? "1px solid var(--accent-highlight-border)" : "1px solid var(--border)" }}>
+              <Paperclip size={13} style={{ color: resumeAttached ? "var(--accent-highlight)" : "var(--muted-foreground)" }} strokeWidth={2} />
+              <span style={{ fontSize: 12, color: resumeAttached ? "var(--accent-highlight)" : "var(--muted-foreground)", fontWeight: resumeAttached ? 600 : 400 }}>
                 {resumeAttached ? "Living Resume attached ✓" : "Attach Living Resume"}
               </span>
             </button>
@@ -417,9 +417,9 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
                     <p style={{ fontSize: 15, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>Jordan Park</p>
                     <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>Sr. Portfolio Optimization Specialist</p>
                   </div>
-                  <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ background: "rgba(163,230,53,0.10)", border: "1px solid rgba(163,230,53,0.25)" }}>
-                    <BadgeCheck size={11} style={{ color: "#A3E635" }} strokeWidth={2.5} />
-                    <span style={{ fontSize: 9, color: "#A3E635", fontWeight: 600, fontFamily: "var(--font-mono)" }}>VERIFIED</span>
+                  <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
+                    <BadgeCheck size={11} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
+                    <span style={{ fontSize: 9, color: "var(--accent-highlight)", fontWeight: 600, fontFamily: "var(--font-mono)" }}>VERIFIED</span>
                   </div>
                 </div>
               </div>
@@ -490,16 +490,16 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
       {/* Send CTA */}
       <div className="px-5 pb-8 pt-3 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
         {sent ? (
-          <div className="flex items-center justify-center gap-2 rounded-xl py-3" style={{ background: "rgba(163,230,53,0.12)", border: "1px solid rgba(163,230,53,0.3)" }}>
-            <CheckCircle2 size={15} style={{ color: "#A3E635" }} strokeWidth={2.5} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#A3E635" }}>
+          <div className="flex items-center justify-center gap-2 rounded-xl py-3" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
+            <CheckCircle2 size={15} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-highlight)" }}>
               {tab === "message" ? "Message sent!" : "Resume sent!"}
             </span>
           </div>
         ) : (
           <button onClick={handleSend}
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3 transition-opacity"
-            style={{ background: "#A3E635", fontSize: 13, fontWeight: 700, color: "#0A0A0A" }}>
+            style={{ background: "var(--accent-highlight)", fontSize: 13, fontWeight: 700, color: "var(--primary-foreground)" }}>
             <Send size={14} strokeWidth={2.5} />
             {tab === "message" ? `Send to ${employer.name}` : `Send Resume to ${employer.name}`}
           </button>
@@ -529,30 +529,30 @@ function EmployerDiscovery() {
       <div className="px-5 pt-5 pb-3">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
               Reach Out
             </span>
-            <p style={{ fontSize: 11, color: "#52525B", marginTop: 2 }}>Employers matched to your arc</p>
+            <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>Employers matched to your arc</p>
           </div>
-          <span className="rounded-full px-2.5 py-1" style={{ fontSize: 9, fontWeight: 600, background: "rgba(163,230,53,0.08)", color: "#A3E635", border: "1px solid rgba(163,230,53,0.2)", fontFamily: "var(--font-mono)" }}>
+          <span className="rounded-full px-2.5 py-1" style={{ fontSize: 9, fontWeight: 600, background: "var(--accent-highlight-bg)", color: "var(--accent-highlight)", border: "1px solid var(--accent-highlight-border)", fontFamily: "var(--font-mono)" }}>
             {employers.filter((e) => e.hiring).length} HIRING
           </span>
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 rounded-xl px-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", height: 38 }}>
-          <Search size={13} style={{ color: "#52525B" }} strokeWidth={2} />
+        <div className="flex items-center gap-2 rounded-xl px-3" style={{ background: "var(--input-background)", border: "1px solid var(--border)", height: 38 }}>
+          <Search size={13} style={{ color: "var(--muted-foreground)" }} strokeWidth={2} />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search companies, roles, industries…"
             className="flex-1 bg-transparent outline-none"
-            style={{ fontSize: 12, color: "#E4E4E7" }}
+            style={{ fontSize: 12, color: "var(--foreground)" }}
           />
           {query && (
             <button onClick={() => setQuery("")}>
-              <X size={12} style={{ color: "#52525B" }} />
+              <X size={12} style={{ color: "var(--muted-foreground)" }} />
             </button>
           )}
         </div>
@@ -567,7 +567,7 @@ function EmployerDiscovery() {
               key={employer.id}
               onClick={() => setSelected(employer)}
               className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+              style={{ background: "var(--card)", border: "1px solid var(--border)" }}
             >
               <div className="flex items-start gap-3 px-4 py-3.5">
                 {/* Logo */}
@@ -578,9 +578,9 @@ function EmployerDiscovery() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{employer.name}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{employer.name}</span>
                       {employer.hiring && (
-                        <span className="rounded-full px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: "rgba(163,230,53,0.10)", color: "#A3E635", fontFamily: "var(--font-mono)" }}>HIRING</span>
+                        <span className="rounded-full px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: "var(--accent-highlight-bg)", color: "var(--accent-highlight)", fontFamily: "var(--font-mono)" }}>HIRING</span>
                       )}
                     </div>
                     <span className="rounded-md px-2 py-0.5 shrink-0" style={{ fontSize: 10, fontWeight: 700, background: fit.bg, color: fit.text, fontFamily: "var(--font-mono)" }}>
@@ -588,28 +588,28 @@ function EmployerDiscovery() {
                     </span>
                   </div>
 
-                  <p style={{ fontSize: 11, color: "#71717A", marginTop: 2 }} className="truncate">{employer.openRole}</p>
+                  <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }} className="truncate">{employer.openRole}</p>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#52525B" }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "var(--muted-foreground)" }}>
                       <Building2 size={9} strokeWidth={2} />{employer.industry}
                     </span>
-                    <span style={{ color: "#3F3F46", fontSize: 10 }}>·</span>
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#52525B" }}>
+                    <span style={{ color: "var(--border)", fontSize: 10 }}>·</span>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "var(--muted-foreground)" }}>
                       <MapPin size={9} strokeWidth={2} />{employer.location}
                     </span>
                   </div>
                 </div>
 
-                <ChevronRight size={14} style={{ color: "#3F3F46", marginTop: 2, flexShrink: 0 }} />
+                <ChevronRight size={14} style={{ color: "var(--muted-foreground)", marginTop: 2, flexShrink: 0 }} />
               </div>
 
               {/* Fit label strip */}
               <div className="px-4 pb-3 flex items-center gap-1.5">
                 <TrendingUp size={10} style={{ color: fit.text }} strokeWidth={2.5} />
                 <span style={{ fontSize: 10, color: fit.text, fontWeight: 500 }}>{employer.fitLabel}</span>
-                <span style={{ fontSize: 10, color: "#3F3F46" }}>·</span>
-                <span style={{ fontSize: 10, color: "#52525B" }}>{employer.stage} · {employer.teamSize}</span>
+                <span style={{ fontSize: 10, color: "var(--border)" }}>·</span>
+                <span style={{ fontSize: 10, color: "var(--muted-foreground)" }}>{employer.stage} · {employer.teamSize}</span>
               </div>
             </button>
           );
@@ -637,18 +637,18 @@ export function NavigatorTab() {
       <EmployerDiscovery />
 
       {/* Divider */}
-      <div className="mx-5 my-1" style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
+      <div className="mx-5 my-1" style={{ height: 1, background: "var(--border)" }} />
 
       <div className="px-5 pt-4 pb-1 flex items-center justify-between">
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
           Career Arc · Timeline
         </span>
-        <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>5 nodes</span>
+        <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>5 nodes</span>
       </div>
 
       <div className="px-5 pb-2">
         <div className="relative">
-          <div className="absolute" style={{ left: 11, top: 12, bottom: 12, width: 1, background: "linear-gradient(to bottom, #3F3F46, #27272A 60%, transparent)" }} />
+          <div className="absolute" style={{ left: 11, top: 12, bottom: 12, width: 1, background: "linear-gradient(to bottom, var(--border), transparent)" }} />
           <div className="space-y-0">
             {timelineMilestones.map((m, i) => {
               const isPredicted = m.type === "predicted";
@@ -657,22 +657,22 @@ export function NavigatorTab() {
               return (
                 <div key={m.id} className="relative flex gap-3">
                   <div className="flex flex-col items-center shrink-0" style={{ width: 23 }}>
-                    <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 23, height: 23, background: isCurrent ? "#A3E635" : isPredicted ? routeColors[(m as any).route].bg : "rgba(255,255,255,0.06)", border: isCurrent ? "2px solid #A3E635" : isPredicted ? `1.5px solid ${routeColors[(m as any).route].dot}` : "1.5px solid #3F3F46", zIndex: 1 }}>
-                      {isCurrent ? <CircleDot size={10} color="#0A0A0A" strokeWidth={3} /> : isPredicted ? <span style={{ fontSize: 8, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).route}</span> : <CheckCircle2 size={10} color="#52525B" strokeWidth={2.5} />}
+                    <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 23, height: 23, background: isCurrent ? "var(--accent-highlight)" : isPredicted ? routeColors[(m as any).route].bg : "var(--accent)", border: isCurrent ? "2px solid var(--accent-highlight)" : isPredicted ? `1.5px solid ${routeColors[(m as any).route].dot}` : "1.5px solid var(--border)", zIndex: 1 }}>
+                      {isCurrent ? <CircleDot size={10} color="var(--primary-foreground)" strokeWidth={3} /> : isPredicted ? <span style={{ fontSize: 8, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).route}</span> : <CheckCircle2 size={10} color="var(--muted-foreground)" strokeWidth={2.5} />}
                     </div>
                   </div>
-                  <div className="flex-1 mb-3 rounded-xl overflow-hidden" style={{ background: isCurrent ? "rgba(163,230,53,0.04)" : isPredicted ? routeColors[(m as any).route].bg : "rgba(255,255,255,0.03)", border: isCurrent ? "1px solid rgba(163,230,53,0.20)" : isPredicted ? `1px solid ${routeColors[(m as any).route].dot}22` : "1px solid rgba(255,255,255,0.05)" }}>
+                  <div className="flex-1 mb-3 rounded-xl overflow-hidden" style={{ background: isCurrent ? "var(--accent-highlight-bg)" : isPredicted ? routeColors[(m as any).route].bg : "var(--card)", border: isCurrent ? "1px solid var(--accent-highlight-border)" : isPredicted ? `1px solid ${routeColors[(m as any).route].dot}22` : "1px solid var(--border)" }}>
                     <button className="w-full text-left p-3" onClick={() => isPredicted && setExpandedRoute(isExpanded ? null : m.id)}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {isPredicted && <span style={{ fontSize: 9, fontWeight: 600, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Route {(m as any).route}</span>}
-                            {isCurrent && <span style={{ fontSize: 9, fontWeight: 600, color: "#A3E635", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Current</span>}
-                            {m.type === "past" && <span style={{ fontSize: 9, fontWeight: 500, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Past · Verified</span>}
+                            {isCurrent && <span style={{ fontSize: 9, fontWeight: 600, color: "var(--accent-highlight)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Current</span>}
+                            {m.type === "past" && <span style={{ fontSize: 9, fontWeight: 500, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Past · Verified</span>}
                           </div>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: "#F5F5F5", marginTop: 2, letterSpacing: "-0.01em" }}>{m.title}</p>
-                          {!isPredicted && <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{(m as any).org}</p>}
-                          {isPredicted && <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{(m as any).orgs?.join(" · ")}</p>}
+                          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)", marginTop: 2, letterSpacing: "-0.01em" }}>{m.title}</p>
+                          {!isPredicted && <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{(m as any).org}</p>}
+                          {isPredicted && <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{(m as any).orgs?.join(" · ")}</p>}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isPredicted && <span style={{ fontSize: 11, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).confidence}%</span>}
@@ -682,14 +682,14 @@ export function NavigatorTab() {
                       {!isPredicted && (m as any).skills && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {(m as any).skills.map((s: string) => (
-                            <span key={s} style={{ fontSize: 9, background: "rgba(255,255,255,0.06)", color: "#A1A1AA", borderRadius: 4, padding: "2px 6px", fontFamily: "var(--font-mono)" }}>{s}</span>
+                            <span key={s} style={{ fontSize: 9, background: "var(--accent)", color: "var(--muted-foreground)", borderRadius: 4, padding: "2px 6px", fontFamily: "var(--font-mono)" }}>{s}</span>
                           ))}
                         </div>
                       )}
                     </button>
                     {isPredicted && isExpanded && (
                       <div style={{ borderTop: `1px solid ${routeColors[(m as any).route].dot}18`, padding: "10px 12px 12px" }}>
-                        <p style={{ fontSize: 12, color: "#A1A1AA", lineHeight: 1.55 }}>{(m as any).rationale}</p>
+                        <p style={{ fontSize: 12, color: "var(--muted-foreground)", lineHeight: 1.55 }}>{(m as any).rationale}</p>
                         <button className="flex items-center gap-1.5 mt-2.5 rounded-lg px-3 py-1.5" style={{ background: routeColors[(m as any).route].bg, border: `1px solid ${routeColors[(m as any).route].dot}33` }}>
                           <TrendingUp size={11} style={{ color: routeColors[(m as any).route].text }} strokeWidth={2.5} />
                           <span style={{ fontSize: 11, color: routeColors[(m as any).route].text, fontWeight: 600 }}>Explore this path</span>
@@ -707,32 +707,32 @@ export function NavigatorTab() {
       {/* Living Portfolio card */}
       <div className="px-5 pt-1 pb-2">
         <div className="flex items-center justify-between mb-3">
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>Living Portfolio · Real-time</span>
-          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>Syncing</span></div>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>Living Portfolio · Real-time</span>
+          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>Syncing</span></div>
         </div>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-            <div className="flex items-center gap-2"><Zap size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} /><span style={{ fontSize: 12, fontWeight: 600, color: "#F5F5F5" }}>Proof of Capability Feed</span></div>
-            <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>4 verified</span>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="flex items-center gap-2"><Zap size={13} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} /><span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>Proof of Capability Feed</span></div>
+            <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>4 verified</span>
           </div>
           {portfolioSamples.slice(0, 3).map((item, i) => (
-            <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--accent)", border: "1px solid var(--border)" }}>
                 <PortfolioIcon type={item.icon} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5"><span style={{ fontSize: 12, fontWeight: 600, color: "#E4E4E7" }}>{item.title}</span><CheckCircle2 size={10} style={{ color: "#A3E635" }} strokeWidth={2.5} /></div>
-                <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }} className="truncate">{item.subtitle}</p>
+                <div className="flex items-center gap-1.5"><span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>{item.title}</span><CheckCircle2 size={10} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} /></div>
+                <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }} className="truncate">{item.subtitle}</p>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
                 <span className="rounded-md px-1.5 py-0.5" style={{ fontSize: 9, fontWeight: 600, background: `${item.tagColor}18`, color: item.tagColor, fontFamily: "var(--font-mono)" }}>{item.tag}</span>
-                <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>{item.age}</span>
+                <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>{item.age}</span>
               </div>
             </div>
           ))}
-          <button className="w-full flex items-center justify-center gap-1.5 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-            <span style={{ fontSize: 11, color: "#52525B", fontWeight: 500 }}>View full portfolio</span>
-            <ArrowUpRight size={11} style={{ color: "#52525B" }} />
+          <button className="w-full flex items-center justify-center gap-1.5 py-3" style={{ borderTop: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500 }}>View full portfolio</span>
+            <ArrowUpRight size={11} style={{ color: "var(--muted-foreground)" }} />
           </button>
         </div>
       </div>
@@ -776,10 +776,10 @@ export function PortfolioTab() {
 
       <div className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div>
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>My Portfolio</span>
-          <div className="flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>4 items · All verified</span></div>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>My Portfolio</span>
+          <div className="flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>4 items · All verified</span></div>
         </div>
-        <span className="rounded-full px-2.5 py-1" style={{ fontSize: 10, fontWeight: 600, background: "rgba(163,230,53,0.08)", color: "#A3E635", border: "1px solid rgba(163,230,53,0.2)", fontFamily: "var(--font-mono)" }}>LIVE</span>
+        <span className="rounded-full px-2.5 py-1" style={{ fontSize: 10, fontWeight: 600, background: "var(--accent-highlight-bg)", color: "var(--accent-highlight)", border: "1px solid var(--accent-highlight-border)", fontFamily: "var(--font-mono)" }}>LIVE</span>
       </div>
 
       <div className="px-5 pb-4 space-y-3">
@@ -788,19 +788,19 @@ export function PortfolioTab() {
             key={sample.id}
             onClick={() => setSelected(sample)}
             className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
             {/* Card header */}
-            <div className="flex items-start gap-3 p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <div className="flex items-start gap-3 p-4" style={{ borderBottom: "1px solid var(--border)" }}>
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${sample.tagColor}14`, border: `1px solid ${sample.tagColor}28` }}>
                 <PortfolioIcon type={sample.icon} size={16} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{sample.title}</span>
-                  {sample.verified && <CheckCircle2 size={11} style={{ color: "#A3E635" }} strokeWidth={2.5} />}
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{sample.title}</span>
+                  {sample.verified && <CheckCircle2 size={11} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />}
                 </div>
-                <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{sample.subtitle}</p>
+                <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{sample.subtitle}</p>
               </div>
               <div className="flex flex-col items-end gap-1.5 shrink-0">
                 <span className="rounded-md px-2 py-0.5" style={{ fontSize: 9, fontWeight: 700, background: `${sample.tagColor}18`, color: sample.tagColor, fontFamily: "var(--font-mono)" }}>{sample.tag}</span>
@@ -861,8 +861,8 @@ export function CoachTab() {
           <Sparkles size={14} style={{ color: "#A78BFA" }} strokeWidth={2} />
         </div>
         <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5" }}>Senior AI Career Coach</p>
-          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>Online · Monitoring your signals</span></div>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>Senior AI Career Coach</p>
+          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>Online · Monitoring your signals</span></div>
         </div>
       </div>
 
@@ -975,23 +975,23 @@ export function EmployeeView() {
       </div>
 
       {/* Top Nav */}
-      <div className="flex items-center justify-between px-5 shrink-0" style={{ height: 60, borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(10,10,10,0.95)" }}>
+      <div className="flex items-center justify-between px-5 shrink-0" style={{ height: 60, borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
         <div>
           <div className="flex items-center gap-1.5">
-            <span style={{ fontSize: 15, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.02em" }}>Jordan Park</span>
-            <ShieldCheck size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+            <span style={{ fontSize: 15, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.02em" }}>Jordan Park</span>
+            <ShieldCheck size={13} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(163,230,53,0.10)", fontSize: 10, color: "#A3E635", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} />
+            <span className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "var(--accent-highlight-bg)", fontSize: 10, color: "var(--accent-highlight)", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} />
               LIVING PORTFOLIO · ACTIVE
             </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="relative flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Bell size={15} style={{ color: "#A1A1AA" }} strokeWidth={1.8} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: "#A3E635", border: "1.5px solid #0A0A0A" }} />
+          <button className="relative flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: "var(--accent)", border: "1px solid var(--border)" }}>
+            <Bell size={15} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: "var(--accent-highlight)", border: "1.5px solid var(--border)" }} />
           </button>
           <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3730A3, #7C3AED)", fontSize: 12, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono)" }}>JP</div>
         </div>
@@ -1006,13 +1006,13 @@ export function EmployeeView() {
       </div>
 
       {/* Bottom Tab Bar */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-around shrink-0" style={{ height: 80, paddingBottom: 16, background: "rgba(10,10,10,0.96)", borderTop: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(20px)" }}>
+      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-around shrink-0" style={{ height: 80, paddingBottom: 16, background: "var(--card)", borderTop: "1px solid var(--border)", backdropFilter: "blur(20px)" }}>
         {tabItems.map(({ id, icon, label }) => {
           const active = activeTab === id;
           return (
             <button key={id} onClick={() => setActiveTab(id)} className="flex flex-col items-center gap-1 transition-all duration-150" style={{ minWidth: 60 }}>
-              <div style={{ color: active ? "#A3E635" : "#52525B", transform: active ? "scale(1.05)" : "scale(1)", transition: "all 0.15s" }}>{icon}</div>
-              <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: active ? "#A3E635" : "#52525B", letterSpacing: "-0.01em" }}>{label}</span>
+              <div style={{ color: active ? "var(--accent-highlight)" : "var(--muted-foreground)", transform: active ? "scale(1.05)" : "scale(1)", transition: "all 0.15s" }}>{icon}</div>
+              <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: active ? "var(--accent-highlight)" : "var(--muted-foreground)", letterSpacing: "-0.01em" }}>{label}</span>
             </button>
           );
         })}
