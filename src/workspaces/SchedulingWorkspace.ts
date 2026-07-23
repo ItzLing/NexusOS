@@ -59,4 +59,64 @@ export class SchedulingWorkspace {
     public getPendingInterviews(): ScheduledInterview[] {
         return this.interviews.filter(i => i.confirmedSlot === null);
     }
+
+    /**
+     * Evaluates availability overlaps between candidate slots and hiring team/recruiter slots.
+     * Returns slots where both parties have isAvailable = true and time ranges overlap.
+     */
+    public static findOverlapSlots(
+        candidateSlots: AvailabilitySlot[],
+        recruiterSlots: AvailabilitySlot[]
+    ): AvailabilitySlot[] {
+        const overlaps: AvailabilitySlot[] = [];
+
+        for (const cSlot of candidateSlots) {
+            if (!cSlot.isAvailable) continue;
+            for (const rSlot of recruiterSlots) {
+                if (!rSlot.isAvailable) continue;
+
+                // Check for time overlap
+                const start = cSlot.startTime > rSlot.startTime ? cSlot.startTime : rSlot.startTime;
+                const end = cSlot.endTime < rSlot.endTime ? cSlot.endTime : rSlot.endTime;
+
+                if (start < end) {
+                    overlaps.push({
+                        startTime: start,
+                        endTime: end,
+                        isAvailable: true
+                    });
+                }
+            }
+        }
+
+        return overlaps;
+    }
+
+    /**
+     * Automatically evaluates overlaps, selects the first matching slot, transitions the stage,
+     * and dispatches a simulated Google Calendar event complete with the AI Trajectory Brief.
+     */
+    public resolveAndConfirmMeeting(interviewId: string, recruiterSlots: AvailabilitySlot[]): void {
+        const interview = this.interviews.find(i => i.id === interviewId);
+        if (!interview) return;
+
+        const overlaps = SchedulingWorkspace.findOverlapSlots(interview.availabilitySlots, recruiterSlots);
+        if (overlaps.length > 0) {
+            const chosenSlot = overlaps[0];
+            
+            // Confirm the slot and transition stage to MatchStage.SCHEDULED
+            this.confirmSlot(interviewId, chosenSlot);
+
+            // Dispatch Google Calendar invite
+            const mockEventId = `gcal-evt-${Math.random().toString(36).substr(2, 9)}`;
+            this.dispatchCalendarEvent(interviewId, mockEventId);
+
+            // Simulate sending payload containing the AI Trajectory Brief
+            console.log(`[Google Calendar API] Dispatched invite event ${mockEventId} for slot: ${chosenSlot.startTime.toISOString()} to ${chosenSlot.endTime.toISOString()}`);
+            console.log(`[Google Calendar API] Embedded AI Trajectory Brief:\n> "${interview.aiSummaryBrief}"`);
+        } else {
+            console.log(`[Google Calendar API] No overlaps found for interview ${interviewId}.`);
+        }
+    }
 }
+
