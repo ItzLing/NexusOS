@@ -38,29 +38,37 @@
   --sidebar-accent: #292524;
   --sidebar-accent-foreground: #E7DDD5;
   --sidebar-border: rgba(255,255,255,0.07);
-  --sidebar-ring: #C2622A;
+  --accent-highlight: #C2622A;
+  --accent-highlight-bg: rgba(194, 98, 42, 0.08);
+  --accent-highlight-border: rgba(194, 98, 42, 0.2);
+  --selected-card-background: #FFFFFF;
 }
 
 .dark {
   --background: #080806;
   --foreground: #F5F5F5;
-  --card: #0F0F0F;
+  --card: #080806;
   --card-foreground: #F5F5F5;
-  --popover: #0F0F0F;
+  --popover: #080806;
   --popover-foreground: #F5F5F5;
   --primary: #C2622A;
   --primary-foreground: #FFFFFF;
-  --secondary: #1A1817;
+  --secondary: #080806;
   --secondary-foreground: #F5F5F5;
-  --muted: #1A1817;
+  --muted: #080806;
   --muted-foreground: #A1A1AA;
-  --accent: #1A1817;
+  --accent: #080806;
   --accent-foreground: #F5F5F5;
   --destructive: #B91C1C;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.15);
   --input: transparent;
+  --input-background: #080806;
   --ring: #C2622A;
+  --accent-highlight: #A3E635;
+  --accent-highlight-bg: rgba(163, 230, 53, 0.08);
+  --accent-highlight-border: rgba(163, 230, 53, 0.2);
+  --selected-card-background: rgba(194, 98, 42, 0.12);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --chart-1: oklch(0.488 0.243 264.376);
