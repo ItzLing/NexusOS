@@ -4,6 +4,7 @@ import {
   Compass, FolderOpen, MessageSquare, DollarSign,
   LogOut, ShieldCheck, Sparkles, X, TrendingUp,
   User, CreditCard, Shield, HelpCircle,
+  Moon, Sun
 } from "lucide-react";
 import { NavigatorTab, PortfolioTab, CoachTab, PayTab } from "./EmployeeView";
 
@@ -158,9 +159,11 @@ const employeeNotifications = [
 
 interface Props {
   onSignOut: () => void;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
 }
 
-export function EmployeeShell({ onSignOut }: Props) {
+export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
   const [activeView, setActiveView] = useState<EmployeeViewTab>("navigator");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -375,6 +378,14 @@ export function EmployeeShell({ onSignOut }: Props) {
           </div>
 
           <div className="flex items-center gap-2 ml-auto shrink-0">
+            <button
+              onClick={onToggleTheme}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+              style={{ color: "#A1A1AA" }}
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === "dark" ? <Sun size={15} strokeWidth={1.8} /> : <Moon size={15} strokeWidth={1.8} />}
+            </button>
             {/* Bell */}
             <button
               onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); markAllRead(); }}

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search, Bell, ChevronDown, SlidersHorizontal, ArrowUpDown,
   Filter, Sparkles, Building2, LayoutList, Zap, Briefcase,
   Settings, Brain, MessageSquareMore, ChevronRight, LogOut,
   X, User, Shield, CreditCard, HelpCircle, ArrowLeft,
+  Moon, Sun
 } from "lucide-react";
 import { CandidateCard, type Candidate } from "./components/CandidateCard";
 import { InsightPanel } from "./components/InsightPanel";
@@ -475,9 +476,13 @@ function MobilePipelineView({ onInitiateIntro }: PipelineProps) {
 }
 
 /* ─── Employer Shell ─── */
-interface EmployerShellProps { onSignOut: () => void; }
+interface EmployerShellProps {
+  onSignOut: () => void;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
+}
 
-function EmployerShell({ onSignOut }: EmployerShellProps) {
+function EmployerShell({ onSignOut, theme, onToggleTheme }: EmployerShellProps) {
   const [employerView, setEmployerView] = useState<EmployerView>("pipeline");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -558,6 +563,14 @@ function EmployerShell({ onSignOut }: EmployerShellProps) {
               </div>
             )}
             <div className="flex items-center gap-2 ml-auto shrink-0">
+              <button
+                onClick={onToggleTheme}
+                className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-accent"
+                style={{ color: "var(--muted-foreground)" }}
+                title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {theme === "dark" ? <Sun size={15} strokeWidth={1.8} /> : <Moon size={15} strokeWidth={1.8} />}
+              </button>
               <button id="bell-btn" onClick={() => { setNotifOpen((p) => !p); setProfileOpen(false); markAllRead(); }}
                 className="relative w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-accent">
                 <Bell size={15} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
@@ -833,6 +846,17 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 /* ─── Root App — auth router ─── */
 export default function App() {
   const [authRole, setAuthRole] = useState<AuthRole | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   if (initError) {
     return (
@@ -846,8 +870,20 @@ export default function App() {
   return (
     <ErrorBoundary>
       {authRole === null && <LoginPage onLogin={(role) => setAuthRole(role)} />}
-      {authRole === "employee" && <EmployeeShell onSignOut={() => setAuthRole(null)} />}
-      {authRole === "employer" && <EmployerShell onSignOut={() => setAuthRole(null)} />}
+      {authRole === "employee" && (
+        <EmployeeShell
+          onSignOut={() => setAuthRole(null)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      )}
+      {authRole === "employer" && (
+        <EmployerShell
+          onSignOut={() => setAuthRole(null)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      )}
     </ErrorBoundary>
   );
 }
