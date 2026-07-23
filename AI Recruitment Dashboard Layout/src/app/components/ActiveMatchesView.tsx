@@ -112,6 +112,9 @@ export function ActiveMatchesView({ onFastTrack }: Props) {
   const [filterStatus, setFilterStatus] = useState<string>("All");
   const [filterOpen, setFilterOpen] = useState(false);
 
+  const [scheduledMeetings, setScheduledMeetings] = useState<Record<string, { confirmedSlot: string; eventId: string; brief: string }>>({});
+  const [onboardingRecords, setOnboardingRecords] = useState<Record<string, { dependencies: string[]; milestones: { title: string; desc: string; severity: string }[] }>>({});
+
   const phases = ["All", "Ready for Pivot", "Accelerating", "Exploring"];
   const statusOptions: Array<"All" | "new" | "reviewing" | "introduced"> = ["All", "new", "reviewing", "introduced"];
 
@@ -322,40 +325,154 @@ export function ActiveMatchesView({ onFastTrack }: Props) {
           </section>
 
           {/* Actions */}
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={handleFastTrack}
-              disabled={liveSelected.status === "introduced"}
-              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2.5 transition-all"
-              style={{
-                background: liveSelected.status === "introduced" ? "#ECFDF5" : "var(--primary)",
-                fontSize: 12,
-                fontWeight: 500,
-                color: liveSelected.status === "introduced" ? "#065F46" : "#fff",
-                border: liveSelected.status === "introduced" ? "1px solid #A7F3D0" : "none",
-                cursor: liveSelected.status === "introduced" ? "default" : "pointer",
-              }}
-            >
-              {liveSelected.status === "introduced" ? (
-                <><CheckCircle2 size={12} strokeWidth={2.5} /> Introduced</>
-              ) : (
-                <><Zap size={12} strokeWidth={2.5} /> Fast-track Introduction</>
-              )}
-            </button>
-            <button
-              onClick={handleViewProfile}
-              className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent"
-              style={{
-                background: liveSelected.status === "reviewing" ? "rgba(29,78,137,0.08)" : "var(--secondary)",
-                border: `1px solid ${liveSelected.status === "reviewing" ? "#93C5FD" : "var(--border)"}`,
-                fontSize: 12,
-                color: liveSelected.status === "reviewing" ? "#1D4E89" : "var(--muted-foreground)",
-              }}
-            >
-              <ArrowUpRight size={12} strokeWidth={2} />
-              {liveSelected.status === "reviewing" ? "In Review" : "View Profile"}
-            </button>
+          <div className="flex flex-col gap-3 pt-1">
+            {liveSelected.status !== "introduced" ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleFastTrack}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2.5 transition-all text-white hover:opacity-90 active:scale-[0.99]"
+                  style={{ background: "var(--primary)", fontSize: 12, fontWeight: 500 }}
+                >
+                  <Zap size={12} strokeWidth={2.5} /> Fast-track Introduction
+                </button>
+                <button
+                  onClick={handleViewProfile}
+                  className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent"
+                  style={{
+                    background: liveSelected.status === "reviewing" ? "rgba(29,78,137,0.08)" : "var(--secondary)",
+                    border: `1px solid ${liveSelected.status === "reviewing" ? "#93C5FD" : "var(--border)"}`,
+                    fontSize: 12,
+                    color: liveSelected.status === "reviewing" ? "#1D4E89" : "var(--muted-foreground)",
+                  }}
+                >
+                  <ArrowUpRight size={12} strokeWidth={2} />
+                  {liveSelected.status === "reviewing" ? "In Review" : "View Profile"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* 1. Google Calendar Integration Stage */}
+                {!scheduledMeetings[liveSelected.id] ? (
+                  <div className="rounded-xl p-4 space-y-3" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+                    <div className="flex items-center gap-2">
+                      <Zap size={14} style={{ color: "var(--primary)" }} strokeWidth={2.5} />
+                      <span className="text-xs font-bold uppercase tracking-wider text-foreground" style={{ fontFamily: "var(--font-mono)" }}>
+                        Google Calendar Service Overlaps
+                      </span>
+                    </div>
+                    <div className="text-xs space-y-1.5 text-muted-foreground">
+                      <p>• Candidate availability: Sat 10:00–11:00, Sat 12:00–13:00</p>
+                      <p>• Recruiter availability: Sat 11:00–12:00, Sat 12:00–13:00</p>
+                      <div className="rounded-lg p-2.5 mt-2" style={{ background: "rgba(163,230,53,0.08)", border: "1px solid rgba(163,230,53,0.25)" }}>
+                        <p style={{ color: "#4D7C0F", fontWeight: 600 }}>Resolved Overlap Slot: Sat 12:00 – 13:00</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const eventId = `gcal-evt-${Math.random().toString(36).substr(2, 9)}`;
+                        setScheduledMeetings(prev => ({
+                          ...prev,
+                          [liveSelected.id]: {
+                            confirmedSlot: "Saturday 12:00 PM – 1:00 PM",
+                            eventId,
+                            brief: `Candidate ${liveSelected.candidateName} shows ${liveSelected.trajectoryScore}% trajectory fit. Crucial skill gaps identified: ${liveSelected.sharedSkills.length < 3 ? "LangChain, FastAPI, Python" : "Kubernetes, Go, AWS"}`
+                          }
+                        }));
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-white transition-opacity hover:opacity-90 active:scale-[0.99]"
+                      style={{ background: "var(--primary)", fontSize: 12, fontWeight: 600 }}
+                    >
+                      Confirm Slot & Dispatch GCal Invite
+                    </button>
+                  </div>
+                ) : !onboardingRecords[liveSelected.id] ? (
+                  <div className="space-y-3">
+                    <div className="rounded-xl p-4 space-y-3" style={{ background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={14} style={{ color: "#16A34A" }} strokeWidth={2.5} />
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-800" style={{ fontFamily: "var(--font-mono)" }}>
+                          GCal Event Dispatched
+                        </span>
+                      </div>
+                      <div className="text-xs space-y-1" style={{ color: "#166534" }}>
+                        <p><strong>Confirmed Window:</strong> {scheduledMeetings[liveSelected.id].confirmedSlot}</p>
+                        <p><strong>Google Event ID:</strong> {scheduledMeetings[liveSelected.id].eventId}</p>
+                        <div className="rounded-lg p-2.5 mt-2 bg-white/70 border border-emerald-100 text-emerald-900">
+                          <p className="italic">"AI Brief: {scheduledMeetings[liveSelected.id].brief}"</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        // Map onboarding details from skill gaps
+                        const isTechnical = liveSelected.roleTitle.toLowerCase().includes("engineer") || liveSelected.roleTitle.toLowerCase().includes("lead");
+                        const deps = ["Core Engineering Group", isTechnical ? "Infrastructure Operations" : "UI/UX Design Studio"];
+                        const milestones = [
+                          { title: "1-on-1 Architecture Walkthrough", desc: "Review services, infrastructure topology, and deployment setups.", severity: "Low" }
+                        ];
+                        
+                        // Add skill-gap-specific onboarding milestones
+                        if (isTechnical) {
+                          milestones.push(
+                            { title: "Bridge Gap: FastAPI & LangChain Mentorship", desc: "Structured pairing to address backend & agentic framework gaps.", severity: "High" },
+                            { title: "Bridge Gap: Python Development Guidelines", desc: "Ramp up on internal async design patterns.", severity: "Medium" }
+                          );
+                        } else {
+                          milestones.push(
+                            { title: "Bridge Gap: Roadmap Prioritization Review", desc: "Understanding customer feedback validation flows.", severity: "High" }
+                          );
+                        }
+
+                        setOnboardingRecords(prev => ({
+                          ...prev,
+                          [liveSelected.id]: {
+                            dependencies: deps,
+                            milestones
+                          }
+                        }));
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-white transition-opacity hover:opacity-90 active:scale-[0.99]"
+                      style={{ background: "#059669", fontSize: 12, fontWeight: 600 }}
+                    >
+                      Complete Hiring & Launch Onboarding
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-xl p-4 space-y-3" style={{ background: "#EFF6FF", border: "1px solid #BFDBFE" }}>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 size={14} style={{ color: "#2563EB" }} strokeWidth={2.5} />
+                      <span className="text-xs font-bold uppercase tracking-wider text-blue-800" style={{ fontFamily: "var(--font-mono)" }}>
+                        Onboarding Gateway Active
+                      </span>
+                    </div>
+                    <div className="text-xs space-y-2 text-blue-900">
+                      <div>
+                        <strong className="block text-[10px] text-blue-600 uppercase font-bold tracking-wider">Team Dependencies:</strong>
+                        <div className="flex gap-1.5 mt-1 flex-wrap">
+                          {onboardingRecords[liveSelected.id].dependencies.map(d => (
+                            <span key={d} className="bg-blue-100/80 px-2 py-0.5 rounded text-[10px] text-blue-800 font-medium">{d}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <strong className="block text-[10px] text-blue-600 uppercase font-bold tracking-wider mb-1">Targeted Mentorship Milestones:</strong>
+                        <div className="space-y-1.5">
+                          {onboardingRecords[liveSelected.id].milestones.map(m => (
+                            <div key={m.title} className="bg-white/80 p-2 rounded border border-blue-100">
+                              <p className="font-semibold text-blue-950">{m.title} <span className={`text-[9px] px-1 rounded ${m.severity === "High" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>{m.severity} Severity</span></p>
+                              <p className="text-[10px] text-blue-800/90 mt-0.5">{m.desc}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+
         </div>
       </div>
     </div>

@@ -93,12 +93,29 @@ function getInsight(id: string): InsightData {
 
 interface Props {
   candidate: Candidate;
+  justification?: any;
   onInitiateIntro?: (candidateName: string) => void;
 }
 
-export function InsightPanel({ candidate, onInitiateIntro }: Props) {
-  const insight = getInsight(candidate.id);
+export function InsightPanel({ candidate, justification, onInitiateIntro }: Props) {
+  const defaultInsight = getInsight(candidate.id);
   const [saved, setSaved] = useState(false);
+
+  // If a live justification is provided, map its properties to the InsightData structure
+  const insight = justification ? {
+    roleAlignment: candidate.currentTitle,
+    justificationPoints: [
+      { label: "Capability Synthesis", text: justification.capabilitySynthesisText },
+      { label: "Probation Risk Summary", text: justification.probationRiskSummary }
+    ],
+    tradeOffs: justification.skillGaps.map((gap: any) => ({
+      skill: `${gap.name} (Severity: ${gap.severity})`,
+      plateau: gap.mentorshipRequired ? "Requires deliberate mentorship" : "Self-paced adaptation"
+    })),
+    matchedStrengths: justification.forwardStrengths && justification.forwardStrengths.length > 0
+      ? justification.forwardStrengths
+      : candidate.skills.slice(0, 3)
+  } : defaultInsight;
 
   return (
     <div className="flex flex-col h-full" style={{ fontFamily: "var(--font-sans)" }}>
@@ -144,6 +161,7 @@ export function InsightPanel({ candidate, onInitiateIntro }: Props) {
             </span>
           </div>
           <div className="rounded-lg overflow-hidden" style={{ background: "#FFF8F3", border: "1px solid rgba(194,98,42,0.15)" }}>
+
             {insight.justificationPoints.map((point, i) => (
               <div
                 key={point.label}

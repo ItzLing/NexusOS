@@ -6,6 +6,10 @@ export * from "./domain/Candidate";
 export * from "./domain/RoleListing";
 export * from "./domain/AIJustification";
 
+// --- Services ---
+export * from "./services/NLPPipeline";
+export * from "./services/MockInitializer";
+
 // --- PRD Domain Models ---
 export * from "./domain/Milestone";
 export * from "./domain/SignalPost";

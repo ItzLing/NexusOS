@@ -13,56 +13,15 @@ import { ActiveMatchesView } from "./components/ActiveMatchesView";
 import { LoginPage } from "./components/LoginPage";
 import { EmployeeShell } from "./components/EmployeeShell";
 
+import { CareerOSApplicationShell, MockInitializer } from "../../../src";
+
+export const shell = new CareerOSApplicationShell();
+const initResult = MockInitializer.initializeDemoState(shell);
+const candidates: Candidate[] = initResult.candidatesList;
+
 type AuthRole = "employer" | "employee";
 type EmployerView = "pipeline" | "matches" | "roles" | "messages" | "notifications";
 
-const candidates: Candidate[] = [
-  {
-    id: "c1", initials: "PS", avatarBg: "#7C5C4A", name: "Priya Sharma",
-    currentTitle: "Senior Frontend Engineer",
-    trajectoryScore: 94,
-    trajectoryLabel: "Moving toward product architecture & distributed systems",
-    momentum: "rising", phase: "Ready for Pivot",
-    skills: ["React Ecosystem", "API Design", "Systems Thinking", "TypeScript", "GraphQL"],
-    location: "Remote — Bangalore", yearsExp: 7,
-  },
-  {
-    id: "c2", initials: "MW", avatarBg: "#4A6741", name: "Marcus Webb",
-    currentTitle: "Full-Stack Generalist",
-    trajectoryScore: 88,
-    trajectoryLabel: "High-velocity growth through consecutive early-stage environments",
-    momentum: "rising", phase: "Accelerating",
-    skills: ["Node.js", "ML Pipelines", "Product Sense", "Python", "AWS"],
-    location: "London, UK", yearsExp: 5,
-  },
-  {
-    id: "c3", initials: "NO", avatarBg: "#4A5568", name: "Nneka Okonkwo",
-    currentTitle: "UX Researcher",
-    trajectoryScore: 91,
-    trajectoryLabel: "Bridging cognitive science with AI product interaction design",
-    momentum: "pivoting", phase: "Ready for Pivot",
-    skills: ["Cognitive UX", "Research Methods", "AI Explainability", "Figma", "Mixed Methods"],
-    location: "Lagos, NG", yearsExp: 6,
-  },
-  {
-    id: "c4", initials: "DL", avatarBg: "#6B4F6B", name: "David Lin",
-    currentTitle: "Data Engineer",
-    trajectoryScore: 82,
-    trajectoryLabel: "Ops-to-data transition with rare business context fluency",
-    momentum: "stable", phase: "Deep Specializing",
-    skills: ["dbt", "Airflow", "Snowflake", "SQL", "Business Analysis"],
-    location: "Austin, TX", yearsExp: 8,
-  },
-  {
-    id: "c5", initials: "SR", avatarBg: "#7A4545", name: "Sofia Reyes",
-    currentTitle: "Product Manager",
-    trajectoryScore: 86,
-    trajectoryLabel: "Behavioral economics background yielding evidence-first PM instincts",
-    momentum: "rising", phase: "Exploring",
-    skills: ["Behavioral Econ", "Roadmap Strategy", "A/B Testing", "SQL", "Storytelling"],
-    location: "Mexico City, MX", yearsExp: 5,
-  },
-];
 
 type SortKey = "Trajectory Alignment" | "Career Momentum" | "Skills Match" | "Experience Depth";
 const momentumOrder = { rising: 0, pivoting: 1, stable: 2 };
@@ -377,7 +336,7 @@ function PipelineView({ onInitiateIntro }: PipelineProps) {
         </div>
       </div>
       <div className="flex flex-col overflow-hidden flex-[2]" style={{ background: "var(--card)", minWidth: 0 }}>
-        <InsightPanel candidate={selectedCandidate} onInitiateIntro={onInitiateIntro} />
+        <InsightPanel candidate={selectedCandidate} justification={(selectedCandidate as any).justification} onInitiateIntro={onInitiateIntro} />
       </div>
     </div>
   );
@@ -497,6 +456,7 @@ function MobilePipelineView({ onInitiateIntro }: PipelineProps) {
           <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 96 }}>
             <InsightPanel
               candidate={selectedCandidate}
+              justification={(selectedCandidate as any).justification}
               onInitiateIntro={(name) => { onInitiateIntro(name); setSelectedId(null); }}
             />
           </div>
