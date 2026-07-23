@@ -293,7 +293,7 @@ export function EmployeeShell({ onSignOut }: Props) {
                 className="group relative w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-150"
                 style={{
                   background: active ? "rgba(163,230,53,0.10)" : "transparent",
-                  color: active ? "#A3E635" : "#52525B",
+                  color: active ? "#A3E635" : "#8E8E93",
                 }}
               >
                 <Icon size={18} strokeWidth={active ? 2.2 : 1.8} />
@@ -321,7 +321,7 @@ export function EmployeeShell({ onSignOut }: Props) {
             title="Settings"
             onClick={() => setSettingsOpen(true)}
             className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-            style={{ color: settingsOpen ? "#A3E635" : "#3F3F46", background: settingsOpen ? "rgba(163,230,53,0.08)" : "transparent" }}
+            style={{ color: settingsOpen ? "#A3E635" : "#8E8E93", background: settingsOpen ? "rgba(163,230,53,0.08)" : "transparent" }}
           >
             <Settings size={17} strokeWidth={1.8} />
           </button>
@@ -478,7 +478,7 @@ export function EmployeeShell({ onSignOut }: Props) {
                         <span style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>Jordan Park</span>
                         <ShieldCheck size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} />
                       </div>
-                      <span style={{ fontSize: 11, color: "#52525B" }}>Sr. Portfolio Optimization Specialist · Independent</span>
+                      <span style={{ fontSize: 11, color: "#A1A1AA" }}>Sr. Portfolio Optimization Specialist · Independent</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

@@ -532,7 +532,7 @@ function EmployerDiscovery() {
             <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
               Reach Out
             </span>
-            <p style={{ fontSize: 11, color: "#52525B", marginTop: 2 }}>Employers matched to your arc</p>
+            <p style={{ fontSize: 11, color: "#8E9196", marginTop: 2 }}>Employers matched to your arc</p>
           </div>
           <span className="rounded-full px-2.5 py-1" style={{ fontSize: 9, fontWeight: 600, background: "rgba(163,230,53,0.08)", color: "#A3E635", border: "1px solid rgba(163,230,53,0.2)", fontFamily: "var(--font-mono)" }}>
             {employers.filter((e) => e.hiring).length} HIRING
@@ -588,14 +588,14 @@ function EmployerDiscovery() {
                     </span>
                   </div>
 
-                  <p style={{ fontSize: 11, color: "#71717A", marginTop: 2 }} className="truncate">{employer.openRole}</p>
+                  <p style={{ fontSize: 11, color: "#A1A1AA", marginTop: 2 }} className="truncate">{employer.openRole}</p>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#52525B" }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#8E9196" }}>
                       <Building2 size={9} strokeWidth={2} />{employer.industry}
                     </span>
-                    <span style={{ color: "#3F3F46", fontSize: 10 }}>·</span>
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#52525B" }}>
+                    <span style={{ color: "#52525B", fontSize: 10 }}>·</span>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#8E9196" }}>
                       <MapPin size={9} strokeWidth={2} />{employer.location}
                     </span>
                   </div>
@@ -608,8 +608,8 @@ function EmployerDiscovery() {
               <div className="px-4 pb-3 flex items-center gap-1.5">
                 <TrendingUp size={10} style={{ color: fit.text }} strokeWidth={2.5} />
                 <span style={{ fontSize: 10, color: fit.text, fontWeight: 500 }}>{employer.fitLabel}</span>
-                <span style={{ fontSize: 10, color: "#3F3F46" }}>·</span>
-                <span style={{ fontSize: 10, color: "#52525B" }}>{employer.stage} · {employer.teamSize}</span>
+                <span style={{ fontSize: 10, color: "#52525B" }}>·</span>
+                <span style={{ fontSize: 10, color: "#8E9196" }}>{employer.stage} · {employer.teamSize}</span>
               </div>
             </button>
           );
@@ -640,10 +640,10 @@ export function NavigatorTab() {
       <div className="mx-5 my-1" style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
 
       <div className="px-5 pt-4 pb-1 flex items-center justify-between">
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "#8E9196", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
           Career Arc · Timeline
         </span>
-        <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>5 nodes</span>
+        <span style={{ fontSize: 10, color: "#8E9196", fontFamily: "var(--font-mono)" }}>5 nodes</span>
       </div>
 
       <div className="px-5 pb-2">
