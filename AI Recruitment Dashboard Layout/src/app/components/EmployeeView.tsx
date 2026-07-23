@@ -529,10 +529,10 @@ function EmployerDiscovery() {
       <div className="px-5 pt-5 pb-3">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
               Reach Out
             </span>
-            <p style={{ fontSize: 11, color: "#8E9196", marginTop: 2 }}>Employers matched to your arc</p>
+            <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>Employers matched to your arc</p>
           </div>
           <span className="rounded-full px-2.5 py-1" style={{ fontSize: 9, fontWeight: 600, background: "rgba(163,230,53,0.08)", color: "#A3E635", border: "1px solid rgba(163,230,53,0.2)", fontFamily: "var(--font-mono)" }}>
             {employers.filter((e) => e.hiring).length} HIRING
@@ -540,19 +540,19 @@ function EmployerDiscovery() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 rounded-xl px-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", height: 38 }}>
-          <Search size={13} style={{ color: "#52525B" }} strokeWidth={2} />
+        <div className="flex items-center gap-2 rounded-xl px-3" style={{ background: "var(--input-background)", border: "1px solid var(--border)", height: 38 }}>
+          <Search size={13} style={{ color: "var(--muted-foreground)" }} strokeWidth={2} />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search companies, roles, industries…"
             className="flex-1 bg-transparent outline-none"
-            style={{ fontSize: 12, color: "#E4E4E7" }}
+            style={{ fontSize: 12, color: "var(--foreground)" }}
           />
           {query && (
             <button onClick={() => setQuery("")}>
-              <X size={12} style={{ color: "#52525B" }} />
+              <X size={12} style={{ color: "var(--muted-foreground)" }} />
             </button>
           )}
         </div>
@@ -567,7 +567,7 @@ function EmployerDiscovery() {
               key={employer.id}
               onClick={() => setSelected(employer)}
               className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+              style={{ background: "var(--card)", border: "1px solid var(--border)" }}
             >
               <div className="flex items-start gap-3 px-4 py-3.5">
                 {/* Logo */}
@@ -578,7 +578,7 @@ function EmployerDiscovery() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{employer.name}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{employer.name}</span>
                       {employer.hiring && (
                         <span className="rounded-full px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: "rgba(163,230,53,0.10)", color: "#A3E635", fontFamily: "var(--font-mono)" }}>HIRING</span>
                       )}
@@ -588,28 +588,28 @@ function EmployerDiscovery() {
                     </span>
                   </div>
 
-                  <p style={{ fontSize: 11, color: "#A1A1AA", marginTop: 2 }} className="truncate">{employer.openRole}</p>
+                  <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }} className="truncate">{employer.openRole}</p>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#8E9196" }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "var(--muted-foreground)" }}>
                       <Building2 size={9} strokeWidth={2} />{employer.industry}
                     </span>
-                    <span style={{ color: "#52525B", fontSize: 10 }}>·</span>
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#8E9196" }}>
+                    <span style={{ color: "var(--border)", fontSize: 10 }}>·</span>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "var(--muted-foreground)" }}>
                       <MapPin size={9} strokeWidth={2} />{employer.location}
                     </span>
                   </div>
                 </div>
 
-                <ChevronRight size={14} style={{ color: "#3F3F46", marginTop: 2, flexShrink: 0 }} />
+                <ChevronRight size={14} style={{ color: "var(--muted-foreground)", marginTop: 2, flexShrink: 0 }} />
               </div>
 
               {/* Fit label strip */}
               <div className="px-4 pb-3 flex items-center gap-1.5">
                 <TrendingUp size={10} style={{ color: fit.text }} strokeWidth={2.5} />
                 <span style={{ fontSize: 10, color: fit.text, fontWeight: 500 }}>{employer.fitLabel}</span>
-                <span style={{ fontSize: 10, color: "#52525B" }}>·</span>
-                <span style={{ fontSize: 10, color: "#8E9196" }}>{employer.stage} · {employer.teamSize}</span>
+                <span style={{ fontSize: 10, color: "var(--border)" }}>·</span>
+                <span style={{ fontSize: 10, color: "var(--muted-foreground)" }}>{employer.stage} · {employer.teamSize}</span>
               </div>
             </button>
           );
@@ -637,18 +637,18 @@ export function NavigatorTab() {
       <EmployerDiscovery />
 
       {/* Divider */}
-      <div className="mx-5 my-1" style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
+      <div className="mx-5 my-1" style={{ height: 1, background: "var(--border)" }} />
 
       <div className="px-5 pt-4 pb-1 flex items-center justify-between">
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#8E9196", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
           Career Arc · Timeline
         </span>
-        <span style={{ fontSize: 10, color: "#8E9196", fontFamily: "var(--font-mono)" }}>5 nodes</span>
+        <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>5 nodes</span>
       </div>
 
       <div className="px-5 pb-2">
         <div className="relative">
-          <div className="absolute" style={{ left: 11, top: 12, bottom: 12, width: 1, background: "linear-gradient(to bottom, #3F3F46, #27272A 60%, transparent)" }} />
+          <div className="absolute" style={{ left: 11, top: 12, bottom: 12, width: 1, background: "linear-gradient(to bottom, var(--border), transparent)" }} />
           <div className="space-y-0">
             {timelineMilestones.map((m, i) => {
               const isPredicted = m.type === "predicted";
@@ -657,22 +657,22 @@ export function NavigatorTab() {
               return (
                 <div key={m.id} className="relative flex gap-3">
                   <div className="flex flex-col items-center shrink-0" style={{ width: 23 }}>
-                    <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 23, height: 23, background: isCurrent ? "#A3E635" : isPredicted ? routeColors[(m as any).route].bg : "rgba(255,255,255,0.06)", border: isCurrent ? "2px solid #A3E635" : isPredicted ? `1.5px solid ${routeColors[(m as any).route].dot}` : "1.5px solid #3F3F46", zIndex: 1 }}>
-                      {isCurrent ? <CircleDot size={10} color="#0A0A0A" strokeWidth={3} /> : isPredicted ? <span style={{ fontSize: 8, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).route}</span> : <CheckCircle2 size={10} color="#52525B" strokeWidth={2.5} />}
+                    <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 23, height: 23, background: isCurrent ? "#A3E635" : isPredicted ? routeColors[(m as any).route].bg : "var(--accent)", border: isCurrent ? "2px solid #A3E635" : isPredicted ? `1.5px solid ${routeColors[(m as any).route].dot}` : "1.5px solid var(--border)", zIndex: 1 }}>
+                      {isCurrent ? <CircleDot size={10} color="#0A0A0A" strokeWidth={3} /> : isPredicted ? <span style={{ fontSize: 8, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).route}</span> : <CheckCircle2 size={10} color="var(--muted-foreground)" strokeWidth={2.5} />}
                     </div>
                   </div>
-                  <div className="flex-1 mb-3 rounded-xl overflow-hidden" style={{ background: isCurrent ? "rgba(163,230,53,0.04)" : isPredicted ? routeColors[(m as any).route].bg : "rgba(255,255,255,0.03)", border: isCurrent ? "1px solid rgba(163,230,53,0.20)" : isPredicted ? `1px solid ${routeColors[(m as any).route].dot}22` : "1px solid rgba(255,255,255,0.05)" }}>
+                  <div className="flex-1 mb-3 rounded-xl overflow-hidden" style={{ background: isCurrent ? "rgba(163,230,53,0.04)" : isPredicted ? routeColors[(m as any).route].bg : "var(--card)", border: isCurrent ? "1px solid rgba(163,230,53,0.20)" : isPredicted ? `1px solid ${routeColors[(m as any).route].dot}22` : "1px solid var(--border)" }}>
                     <button className="w-full text-left p-3" onClick={() => isPredicted && setExpandedRoute(isExpanded ? null : m.id)}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {isPredicted && <span style={{ fontSize: 9, fontWeight: 600, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Route {(m as any).route}</span>}
                             {isCurrent && <span style={{ fontSize: 9, fontWeight: 600, color: "#A3E635", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Current</span>}
-                            {m.type === "past" && <span style={{ fontSize: 9, fontWeight: 500, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Past · Verified</span>}
+                            {m.type === "past" && <span style={{ fontSize: 9, fontWeight: 500, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Past · Verified</span>}
                           </div>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: "#F5F5F5", marginTop: 2, letterSpacing: "-0.01em" }}>{m.title}</p>
-                          {!isPredicted && <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{(m as any).org}</p>}
-                          {isPredicted && <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{(m as any).orgs?.join(" · ")}</p>}
+                          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)", marginTop: 2, letterSpacing: "-0.01em" }}>{m.title}</p>
+                          {!isPredicted && <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{(m as any).org}</p>}
+                          {isPredicted && <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{(m as any).orgs?.join(" · ")}</p>}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isPredicted && <span style={{ fontSize: 11, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).confidence}%</span>}
@@ -682,14 +682,14 @@ export function NavigatorTab() {
                       {!isPredicted && (m as any).skills && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {(m as any).skills.map((s: string) => (
-                            <span key={s} style={{ fontSize: 9, background: "rgba(255,255,255,0.06)", color: "#A1A1AA", borderRadius: 4, padding: "2px 6px", fontFamily: "var(--font-mono)" }}>{s}</span>
+                            <span key={s} style={{ fontSize: 9, background: "var(--accent)", color: "var(--muted-foreground)", borderRadius: 4, padding: "2px 6px", fontFamily: "var(--font-mono)" }}>{s}</span>
                           ))}
                         </div>
                       )}
                     </button>
                     {isPredicted && isExpanded && (
                       <div style={{ borderTop: `1px solid ${routeColors[(m as any).route].dot}18`, padding: "10px 12px 12px" }}>
-                        <p style={{ fontSize: 12, color: "#A1A1AA", lineHeight: 1.55 }}>{(m as any).rationale}</p>
+                        <p style={{ fontSize: 12, color: "var(--muted-foreground)", lineHeight: 1.55 }}>{(m as any).rationale}</p>
                         <button className="flex items-center gap-1.5 mt-2.5 rounded-lg px-3 py-1.5" style={{ background: routeColors[(m as any).route].bg, border: `1px solid ${routeColors[(m as any).route].dot}33` }}>
                           <TrendingUp size={11} style={{ color: routeColors[(m as any).route].text }} strokeWidth={2.5} />
                           <span style={{ fontSize: 11, color: routeColors[(m as any).route].text, fontWeight: 600 }}>Explore this path</span>
@@ -707,32 +707,32 @@ export function NavigatorTab() {
       {/* Living Portfolio card */}
       <div className="px-5 pt-1 pb-2">
         <div className="flex items-center justify-between mb-3">
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>Living Portfolio · Real-time</span>
-          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>Syncing</span></div>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>Living Portfolio · Real-time</span>
+          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>Syncing</span></div>
         </div>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-            <div className="flex items-center gap-2"><Zap size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} /><span style={{ fontSize: 12, fontWeight: 600, color: "#F5F5F5" }}>Proof of Capability Feed</span></div>
-            <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>4 verified</span>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="flex items-center gap-2"><Zap size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} /><span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>Proof of Capability Feed</span></div>
+            <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>4 verified</span>
           </div>
           {portfolioSamples.slice(0, 3).map((item, i) => (
-            <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--accent)", border: "1px solid var(--border)" }}>
                 <PortfolioIcon type={item.icon} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5"><span style={{ fontSize: 12, fontWeight: 600, color: "#E4E4E7" }}>{item.title}</span><CheckCircle2 size={10} style={{ color: "#A3E635" }} strokeWidth={2.5} /></div>
-                <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }} className="truncate">{item.subtitle}</p>
+                <div className="flex items-center gap-1.5"><span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>{item.title}</span><CheckCircle2 size={10} style={{ color: "#A3E635" }} strokeWidth={2.5} /></div>
+                <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }} className="truncate">{item.subtitle}</p>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
                 <span className="rounded-md px-1.5 py-0.5" style={{ fontSize: 9, fontWeight: 600, background: `${item.tagColor}18`, color: item.tagColor, fontFamily: "var(--font-mono)" }}>{item.tag}</span>
-                <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>{item.age}</span>
+                <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>{item.age}</span>
               </div>
             </div>
           ))}
-          <button className="w-full flex items-center justify-center gap-1.5 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-            <span style={{ fontSize: 11, color: "#52525B", fontWeight: 500 }}>View full portfolio</span>
-            <ArrowUpRight size={11} style={{ color: "#52525B" }} />
+          <button className="w-full flex items-center justify-center gap-1.5 py-3" style={{ borderTop: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500 }}>View full portfolio</span>
+            <ArrowUpRight size={11} style={{ color: "var(--muted-foreground)" }} />
           </button>
         </div>
       </div>
