@@ -968,7 +968,7 @@ function EmployerDiscovery({ applications, onApply }: { applications: JobApplica
 }
 
 /* ─── Navigator Tab ─── */
-function NavigatorTab() {
+export function NavigatorTab({ applications, onApply }: { applications: JobApplication[]; onApply: (employerId: string, coverNote: string) => void }) {
   const [expandedRoute, setExpandedRoute] = useState<string | null>("pred-1");
   const [coachDismissed, setCoachDismissed] = useState(false);
 
@@ -1108,8 +1108,15 @@ function NavigatorTab() {
 }
 
 /* ─── Portfolio Tab ─── */
-function PortfolioTab() {
-  const [selected, setSelected] = useState<PortfolioSample | null>(null);
+function ApplicationDetailOverlay({ app, onClose, onWithdraw }: { app: JobApplication; onClose: () => void; onWithdraw: (id: string) => void }) {
+  const [tab, setTab] = useState<"history" | "assets">("history");
+  
+  const statusConfig = {
+    sent: { label: "Sent", color: "#71717A", bg: "rgba(113,113,122,0.15)" },
+    read: { label: "Opened", color: "#A78BFA", bg: "rgba(124,58,237,0.15)" },
+    interviewing: { label: "Interviewing", color: "#38BDF8", bg: "rgba(56,189,248,0.15)" },
+    hired: { label: "Hired", color: "var(--accent-highlight)", bg: "var(--accent-highlight-bg)" }
+  };
 
   const currentConfig = statusConfig[app.status] || statusConfig.sent;
 
@@ -1132,38 +1139,75 @@ function PortfolioTab() {
     return "";
   };
 
-      <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-        <div>
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>My Portfolio</span>
-          <div className="flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>4 items · All verified</span></div>
+  return (
+    <div className="absolute inset-0 flex flex-col z-30" style={{ background: "#0A0A0A", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "inherit" }}>
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 pt-14 pb-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <ArrowLeft size={15} color="#A1A1AA" />
+        </button>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: app.logoBg }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "var(--font-mono)" }}>{app.logo}</span>
         </div>
-        <span className="rounded-full px-2.5 py-1" style={{ fontSize: 10, fontWeight: 600, background: "rgba(163,230,53,0.08)", color: "#A3E635", border: "1px solid rgba(163,230,53,0.2)", fontFamily: "var(--font-mono)" }}>LIVE</span>
+        <div className="flex-1 min-w-0">
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{app.employerName}</p>
+          <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }} className="truncate">{app.openRole}</p>
+        </div>
+        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold font-mono shrink-0" style={{ background: currentConfig.bg, color: currentConfig.color }}>
+          {currentConfig.label.toUpperCase()}
+        </span>
       </div>
 
-      <div className="px-5 pb-4 space-y-3">
-        {portfolioSamples.map((sample) => (
-          <button
-            key={sample.id}
-            onClick={() => setSelected(sample)}
-            className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-          >
-            {/* Card header */}
-            <div className="flex items-start gap-3 p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${sample.tagColor}14`, border: `1px solid ${sample.tagColor}28` }}>
-                <PortfolioIcon type={sample.icon} size={16} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{sample.title}</span>
-                  {sample.verified && <CheckCircle2 size={11} style={{ color: "#A3E635" }} strokeWidth={2.5} />}
+      {/* Selector Tabs */}
+      <div className="flex px-5 pt-4 gap-2 shrink-0">
+        {(["history", "assets"] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)}
+            className="flex items-center gap-1.5 rounded-lg px-4 py-2 flex-1 justify-center transition-colors"
+            style={{
+              background: tab === t ? "var(--accent-highlight-bg)" : "var(--accent)",
+              border: tab === t ? "1px solid var(--accent-highlight-border)" : "1px solid var(--border)",
+              fontSize: 12,
+              fontWeight: tab === t ? 600 : 400,
+              color: tab === t ? "var(--accent-highlight)" : "var(--muted-foreground)"
+            }}>
+            {t === "history" ? "Update History" : "Materials"}
+          </button>
+        ))}
+      </div>
+
+      {/* Content scroll block */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4" style={{ scrollbarWidth: "none" }}>
+        
+        {/* Section 1: AI Coach Box */}
+        <div className="rounded-xl p-3" style={{ background: "rgba(167,139,250,0.06)", border: "1px solid rgba(167,139,250,0.18)" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Sparkles size={11} style={{ color: "#A78BFA" }} strokeWidth={2.5} />
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#A78BFA", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>AI Coach · Guidance Tips</span>
+          </div>
+          <p style={{ fontSize: 11, color: "#D4D4D8", lineHeight: 1.55, whiteSpace: "pre-line" }}>{getAiCoachingTip()}</p>
+        </div>
+
+        {tab === "history" ? (
+          <div className="relative pl-4 mt-2">
+            {/* Vertical timeline line */}
+            <div className="absolute left-1.5 top-2 bottom-2 w-0.5 bg-zinc-800" />
+
+            {/* List log entries */}
+            <div className="space-y-5">
+              {app.updates.map((update, i) => (
+                <div key={update.status} className="relative flex gap-3">
+                  <div className="absolute -left-4 w-3.5 h-3.5 rounded-full flex items-center justify-center bg-zinc-950" style={{ border: `2px solid ${i === app.updates.length - 1 ? currentConfig.color : "#27272A"}` }}>
+                    {i === app.updates.length - 1 && <div className="w-1.5 h-1.5 rounded-full" style={{ background: currentConfig.color }} />}
+                  </div>
+                  <div>
+                    <div className="flex items-baseline gap-2">
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#F5F5F5" }}>{update.label}</span>
+                      <span style={{ fontSize: 9, color: "#52525B", fontFamily: "var(--font-mono)" }}>{update.time}</span>
+                    </div>
+                    <p style={{ fontSize: 11, color: "#71717A", marginTop: 2, lineHeight: 1.5 }}>{update.description}</p>
+                  </div>
                 </div>
-                <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{sample.subtitle}</p>
-              </div>
-              <div className="flex flex-col items-end gap-1.5 shrink-0">
-                <span className="rounded-md px-2 py-0.5" style={{ fontSize: 9, fontWeight: 700, background: `${sample.tagColor}18`, color: sample.tagColor, fontFamily: "var(--font-mono)" }}>{sample.tag}</span>
-                <ChevronRight size={13} style={{ color: "#52525B" }} />
-              </div>
+              ))}
             </div>
           </div>
         ) : (
@@ -1454,7 +1498,7 @@ export function PortfolioTab({ applications: initialApplications }: { applicatio
 }
 
 /* ─── Coach Tab ─── */
-function CoachTab() {
+export function CoachTab() {
   const [messages, setMessages] = useState<ChatMsg[]>(initialMessages);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -1556,7 +1600,7 @@ function CoachTab() {
 }
 
 /* ─── Pay Tab ─── */
-function PayTab() {
+export function PayTab() {
   return (
     <div className="px-5 pt-5 flex flex-col gap-4">
       <div>
