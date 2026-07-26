@@ -3,7 +3,7 @@ import {
   ShieldCheck, Compass, FolderOpen, MessageSquare, DollarSign,
   GitBranch, CheckCircle2, Sparkles, ChevronRight, TrendingUp,
   Github, FileCode2, Star, ArrowUpRight, Bell, CircleDot, Zap,
-  X, ExternalLink, Award, Send, ArrowLeft, ChevronDown,
+  X, ExternalLink, Award, Send, ArrowLeft,
   Search, Building2, MapPin, Paperclip, FileText, BadgeCheck,
 } from "lucide-react";
 
@@ -130,7 +130,7 @@ const promptShortcuts = [
 ];
 
 const routeColors: Record<string, { dot: string; bg: string; text: string }> = {
-  A: { dot: "var(--accent-highlight)", bg: "var(--accent-highlight-bg)", text: "var(--accent-highlight)" },
+  A: { dot: "#A3E635", bg: "rgba(163,230,53,0.08)", text: "#A3E635" },
   B: { dot: "#38BDF8", bg: "rgba(56,189,248,0.08)", text: "#38BDF8" },
   C: { dot: "#F472B6", bg: "rgba(244,114,182,0.08)", text: "#F472B6" },
 };
@@ -158,7 +158,7 @@ function PortfolioDetail({ sample, onClose }: { sample: PortfolioSample; onClose
         <div className="flex-1">
           <div className="flex items-center gap-1.5">
             <span style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{sample.title}</span>
-            {sample.verified && <CheckCircle2 size={12} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />}
+            {sample.verified && <CheckCircle2 size={12} style={{ color: "#A3E635" }} strokeWidth={2.5} />}
           </div>
           <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{sample.subtitle}</p>
         </div>
@@ -182,9 +182,9 @@ function PortfolioDetail({ sample, onClose }: { sample: PortfolioSample; onClose
           <p style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.1em", fontFamily: "var(--font-mono)", textTransform: "uppercase", marginBottom: 8 }}>
             Key Achievement
           </p>
-          <div className="rounded-xl p-4" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
+          <div className="rounded-xl p-4" style={{ background: "rgba(163,230,53,0.05)", border: "1px solid rgba(163,230,53,0.15)" }}>
             <div className="flex gap-2">
-              <Award size={15} style={{ color: "var(--accent-highlight)", marginTop: 1, flexShrink: 0 }} strokeWidth={2} />
+              <Award size={15} style={{ color: "#A3E635", marginTop: 1, flexShrink: 0 }} strokeWidth={2} />
               <p style={{ fontSize: 13, color: "#D4D4D8", lineHeight: 1.65 }}>{sample.achievement}</p>
             </div>
           </div>
@@ -220,10 +220,10 @@ function PortfolioDetail({ sample, onClose }: { sample: PortfolioSample; onClose
         </section>
 
         {/* Verification */}
-        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
-          <ShieldCheck size={15} style={{ color: "var(--accent-highlight)", flexShrink: 0 }} strokeWidth={2} />
+        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "rgba(163,230,53,0.04)", border: "1px solid rgba(163,230,53,0.12)" }}>
+          <ShieldCheck size={15} style={{ color: "#A3E635", flexShrink: 0 }} strokeWidth={2} />
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "var(--accent-highlight)" }}>Career OS Verified</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#A3E635" }}>Career OS Verified</p>
             <p style={{ fontSize: 10, color: "#52525B", marginTop: 1 }}>Verified {sample.age} · Cryptographic proof of work on file</p>
           </div>
         </div>
@@ -316,11 +316,351 @@ const employers: Employer[] = [
 ];
 
 const fitColors = (score: number) => {
-  if (score >= 90) return { text: "var(--accent-highlight)", bg: "var(--accent-highlight-bg)" };
+  if (score >= 90) return { text: "#A3E635", bg: "rgba(163,230,53,0.10)" };
   if (score >= 80) return { text: "#38BDF8", bg: "rgba(56,189,248,0.08)" };
   if (score >= 70) return { text: "#F472B6", bg: "rgba(244,114,182,0.08)" };
   return { text: "#71717A", bg: "rgba(113,113,122,0.08)" };
 };
+
+/* ─── Achievement pool (all searchable items) ─── */
+interface AchievementItem {
+  id: string;
+  type: "portfolio" | "experience" | "recognition";
+  title: string;
+  org: string;
+  period: string;
+  summary: string;
+  metric: string;
+  tags: string[];
+  relevanceHint: string[]; // employer industry/role keywords this maps to
+}
+
+const achievementPool: AchievementItem[] = [
+  {
+    id: "a1", type: "portfolio",
+    title: "low-latency-cpp-infra",
+    org: "Open Source · GitHub",
+    period: "2024",
+    summary: "High-performance C++ infrastructure layer for sub-millisecond event processing at 10M concurrent connections.",
+    metric: "38% latency reduction · 2.1k ⭐",
+    tags: ["C++20", "io_uring", "DPDK", "Systems"],
+    relevanceHint: ["infrastructure", "systems", "data", "platform"],
+  },
+  {
+    id: "a2", type: "portfolio",
+    title: "kafka-lag-exporter",
+    org: "Open Source · Rust",
+    period: "2024",
+    summary: "Prometheus-compatible Kafka consumer lag exporter. Replaced JVM-based tooling with a 12× smaller binary footprint.",
+    metric: "Memory −88% · 1.2k ⭐ · Strimzi merged",
+    tags: ["Rust", "Kafka", "Prometheus", "Streaming"],
+    relevanceHint: ["streaming", "data", "kafka", "infra", "platform"],
+  },
+  {
+    id: "a3", type: "portfolio",
+    title: "delta-lake-compaction-patch",
+    org: "Apache Delta · OSS Contribution",
+    period: "2024",
+    summary: "Z-order compaction optimization reducing small-file overhead during high-frequency incremental writes.",
+    metric: "Read scans +2.4× faster · 68% file reduction",
+    tags: ["Scala", "Spark", "Delta Lake", "OSS"],
+    relevanceHint: ["data", "lakehouse", "spark", "platform", "infrastructure"],
+  },
+  {
+    id: "a4", type: "experience",
+    title: "Streaming Pipeline Migration",
+    org: "Stripe · Senior Data Engineer",
+    period: "2021–2023",
+    summary: "Led migration of legacy T+4h batch jobs to streaming-first architecture, cutting data freshness SLA to T+90s across 34 downstream analytics products.",
+    metric: "T+4h → T+90s · 34 products unblocked",
+    tags: ["Apache Flink", "Kafka", "Terraform", "Datadog"],
+    relevanceHint: ["streaming", "data", "platform", "infrastructure", "ai"],
+  },
+  {
+    id: "a5", type: "experience",
+    title: "Real-time Ingestion at Scale",
+    org: "Confluent · Data Engineer",
+    period: "2019–2021",
+    summary: "Designed and operated real-time event ingestion pipelines processing 4 billion events per day with sub-second consumer lag.",
+    metric: "4B events/day · <1s consumer lag",
+    tags: ["Kafka", "Spark", "Scala", "AWS"],
+    relevanceHint: ["streaming", "data", "kafka", "infrastructure", "platform"],
+  },
+  {
+    id: "a6", type: "recognition",
+    title: "Stripe Infrastructure Excellence Award",
+    org: "Stripe · Peer Recognition",
+    period: "Q4 2022",
+    summary: "Nominated by 11 peers and 2 engineering leads for the streaming pipeline migration impact. One of 2 recipients from 320 engineers.",
+    metric: "Top 0.6% · 2 of 320 engineers",
+    tags: ["Leadership", "Impact", "Streaming", "Recognition"],
+    relevanceHint: ["infrastructure", "data", "platform", "ai", "streaming"],
+  },
+  {
+    id: "a7", type: "portfolio",
+    title: "LangChain RAG Pipeline",
+    org: "Independent · Open Source",
+    period: "2023",
+    summary: "Production-grade retrieval-augmented generation pipeline using LangChain and Delta Lake for enterprise knowledge bases.",
+    metric: "Query latency p99 < 800ms · 3 enterprise pilots",
+    tags: ["LangChain", "RAG", "Delta Lake", "Python"],
+    relevanceHint: ["ai", "llm", "ml", "platform", "data"],
+  },
+  {
+    id: "a8", type: "experience",
+    title: "ML Feature Store Design",
+    org: "Independent · Consulting",
+    period: "2023",
+    summary: "Designed a low-latency feature store serving real-time ML predictions for a fraud detection pipeline, using Redis + Flink.",
+    metric: "Inference latency < 5ms · $2.1M fraud prevented/mo",
+    tags: ["Redis", "Apache Flink", "ML", "Feature Store"],
+    relevanceHint: ["ai", "ml", "data", "platform", "infrastructure"],
+  },
+];
+
+const typeColors: Record<AchievementItem["type"], { color: string; bg: string; label: string }> = {
+  portfolio: { color: "#7C3AED", bg: "rgba(124,58,237,0.10)", label: "Portfolio" },
+  experience: { color: "#0891B2", bg: "rgba(8,145,178,0.10)", label: "Experience" },
+  recognition: { color: "#D97706", bg: "rgba(217,119,6,0.10)", label: "Award" },
+};
+
+/* ─── Resume Builder component ─── */
+function ResumeBuilder({ employer }: { employer: Employer }) {
+  // Auto-select top 3 by relevance to this employer on first render
+  const autoSelected = achievementPool
+    .filter((a) => a.relevanceHint.some((h) => employer.industry.toLowerCase().includes(h) || employer.openRole.toLowerCase().includes(h)))
+    .slice(0, 3)
+    .map((a) => a.id);
+
+  const [selected, setSelected] = useState<string[]>(autoSelected.length ? autoSelected : achievementPool.slice(0, 3).map((a) => a.id));
+  const [query, setQuery] = useState("");
+  const [filterType, setFilterType] = useState<AchievementItem["type"] | "all">("all");
+  const [coverNote, setCoverNote] = useState("");
+
+  const toggle = (id: string) =>
+    setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+
+  const selectedItems = achievementPool.filter((a) => selected.includes(a.id));
+
+  const relevantIds = new Set(
+    achievementPool
+      .filter((a) => a.relevanceHint.some((h) => employer.industry.toLowerCase().includes(h) || employer.openRole.toLowerCase().includes(h)))
+      .map((a) => a.id)
+  );
+
+  const filtered = achievementPool.filter((a) => {
+    const matchesQuery =
+      a.title.toLowerCase().includes(query.toLowerCase()) ||
+      a.summary.toLowerCase().includes(query.toLowerCase()) ||
+      a.tags.some((t) => t.toLowerCase().includes(query.toLowerCase()));
+    const matchesType = filterType === "all" || a.type === filterType;
+    return matchesQuery && matchesType;
+  });
+
+  // Sort: relevant first, then rest
+  const sortedFiltered = [
+    ...filtered.filter((a) => relevantIds.has(a.id)),
+    ...filtered.filter((a) => !relevantIds.has(a.id)),
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* ── Search + filter ── */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p style={{ fontSize: 10, fontWeight: 600, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Search Achievements
+          </p>
+          <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>
+            {selected.length} added
+          </span>
+        </div>
+
+        {/* Search bar */}
+        <div className="flex items-center gap-2 rounded-xl px-3 mb-2" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", height: 38 }}>
+          <Search size={13} style={{ color: "#52525B" }} strokeWidth={2} />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by title, skill, or keyword…"
+            className="flex-1 bg-transparent outline-none"
+            style={{ fontSize: 12, color: "#E4E4E7" }}
+          />
+          {query && <button onClick={() => setQuery("")}><X size={11} style={{ color: "#52525B" }} /></button>}
+        </div>
+
+        {/* Type filters */}
+        <div className="flex gap-1.5">
+          {(["all", "portfolio", "experience", "recognition"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setFilterType(t)}
+              className="rounded-full px-2.5 py-1 transition-all"
+              style={{
+                fontSize: 10, fontWeight: filterType === t ? 600 : 400,
+                background: filterType === t
+                  ? (t === "all" ? "rgba(163,230,53,0.15)" : typeColors[t as AchievementItem["type"]].bg)
+                  : "rgba(255,255,255,0.04)",
+                color: filterType === t
+                  ? (t === "all" ? "#A3E635" : typeColors[t as AchievementItem["type"]].color)
+                  : "#52525B",
+                border: `1px solid ${filterType === t ? (t === "all" ? "rgba(163,230,53,0.3)" : typeColors[t as AchievementItem["type"]].color + "44") : "rgba(255,255,255,0.07)"}`,
+                textTransform: "capitalize",
+              }}
+            >
+              {t === "all" ? "All" : typeColors[t].label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Achievement pool ── */}
+      <div className="space-y-2">
+        {/* Auto-recommend label */}
+        {!query && filterType === "all" && (
+          <div className="flex items-center gap-1.5 mb-1">
+            <Sparkles size={10} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+            <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>
+              Top matches for {employer.name} · {employer.openRole}
+            </span>
+          </div>
+        )}
+
+        {sortedFiltered.map((item) => {
+          const isSelected = selected.includes(item.id);
+          const isRelevant = relevantIds.has(item.id);
+          const tc = typeColors[item.type];
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => toggle(item.id)}
+              className="w-full text-left rounded-xl transition-all duration-150"
+              style={{
+                background: isSelected ? "rgba(163,230,53,0.06)" : "rgba(255,255,255,0.03)",
+                border: isSelected ? "1.5px solid rgba(163,230,53,0.30)" : "1px solid rgba(255,255,255,0.07)",
+                padding: "10px 12px",
+              }}
+            >
+              <div className="flex items-start gap-2.5">
+                {/* Checkbox */}
+                <div
+                  className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all"
+                  style={{
+                    background: isSelected ? "#A3E635" : "rgba(255,255,255,0.06)",
+                    border: isSelected ? "none" : "1.5px solid rgba(255,255,255,0.15)",
+                  }}
+                >
+                  {isSelected && <CheckCircle2 size={12} color="#0A0A0A" strokeWidth={3} />}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span style={{ fontSize: 12, fontWeight: 600, color: isSelected ? "#F5F5F5" : "#D4D4D8" }}>{item.title}</span>
+                    <span className="rounded px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: tc.bg, color: tc.color, fontFamily: "var(--font-mono)" }}>{tc.label}</span>
+                    {isRelevant && !query && (
+                      <span className="rounded px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: "rgba(163,230,53,0.10)", color: "#A3E635", fontFamily: "var(--font-mono)" }}>
+                        ✦ Recommended
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: 11, color: "#52525B", marginTop: 1 }}>{item.org} · {item.period}</p>
+                  <p style={{ fontSize: 11, color: "#71717A", marginTop: 3, lineHeight: 1.5 }} className="line-clamp-2">{item.summary}</p>
+                  <p style={{ fontSize: 10, color: isSelected ? "#A3E635" : "#52525B", fontFamily: "var(--font-mono)", marginTop: 4, fontWeight: 500 }}>{item.metric}</p>
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {item.tags.map((tag) => (
+                      <span key={tag} style={{ fontSize: 9, background: "rgba(255,255,255,0.05)", color: "#71717A", borderRadius: 4, padding: "1px 5px", fontFamily: "var(--font-mono)" }}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+
+        {sortedFiltered.length === 0 && (
+          <div className="flex flex-col items-center py-6">
+            <Search size={18} style={{ color: "#3F3F46", marginBottom: 6 }} />
+            <p style={{ fontSize: 11, color: "#52525B" }}>No achievements match "{query}"</p>
+          </div>
+        )}
+      </div>
+
+      {/* ── Live Resume Preview ── */}
+      {selectedItems.length > 0 && (
+        <div>
+          <div className="flex items-center gap-1.5 mb-2">
+            <FileText size={11} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+            <p style={{ fontSize: 10, fontWeight: 600, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              Resume Preview · {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.09)" }}>
+            {/* Header */}
+            <div className="px-4 py-4" style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>Jordan Park</p>
+                  <p style={{ fontSize: 10, color: "#71717A", marginTop: 1 }}>Tailored for {employer.name} · {employer.openRole}</p>
+                </div>
+                <div className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(163,230,53,0.10)", border: "1px solid rgba(163,230,53,0.25)" }}>
+                  <BadgeCheck size={10} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+                  <span style={{ fontSize: 8, color: "#A3E635", fontWeight: 700, fontFamily: "var(--font-mono)" }}>VERIFIED</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Selected achievements */}
+            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+              {selectedItems.map((item) => {
+                const tc = typeColors[item.type];
+                return (
+                  <div key={item.id} className="px-4 py-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span style={{ fontSize: 12, fontWeight: 600, color: "#E4E4E7" }}>{item.title}</span>
+                          <span className="rounded px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: tc.bg, color: tc.color, fontFamily: "var(--font-mono)" }}>{tc.label}</span>
+                        </div>
+                        <p style={{ fontSize: 10, color: "#52525B", marginTop: 1 }}>{item.org} · {item.period}</p>
+                        <p style={{ fontSize: 11, color: "#A1A1AA", marginTop: 3, lineHeight: 1.55 }}>{item.summary}</p>
+                        <p style={{ fontSize: 10, color: "#A3E635", fontFamily: "var(--font-mono)", marginTop: 3, fontWeight: 500 }}>{item.metric}</p>
+                      </div>
+                      {/* Remove button */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggle(item.id); }}
+                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+                        style={{ background: "rgba(255,255,255,0.06)" }}
+                      >
+                        <X size={11} style={{ color: "#71717A" }} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cover note */}
+      <div>
+        <p style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Cover Note (optional)</p>
+        <textarea
+          rows={4}
+          value={coverNote}
+          onChange={(e) => setCoverNote(e.target.value)}
+          placeholder="Add a short note to accompany your resume…"
+          className="w-full rounded-xl px-4 py-3 outline-none resize-none"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", fontSize: 13, color: "#E4E4E7", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}
+        />
+      </div>
+    </div>
+  );
+}
 
 /* ─── Employer DM + Resume overlay ─── */
 interface EmployerOverlayProps {
@@ -343,7 +683,7 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col z-30" style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "inherit" }}>
+    <div className="absolute inset-0 flex flex-col z-30" style={{ background: "#0A0A0A", borderRadius: "inherit" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-14 pb-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -363,7 +703,7 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
         {(["message", "resume"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className="flex items-center gap-1.5 rounded-lg px-4 py-2 flex-1 justify-center transition-colors"
-            style={{ background: tab === t ? "var(--accent-highlight-bg)" : "var(--accent)", border: tab === t ? "1px solid var(--accent-highlight-border)" : "1px solid var(--border)", fontSize: 12, fontWeight: tab === t ? 600 : 400, color: tab === t ? "var(--accent-highlight)" : "var(--muted-foreground)" }}>
+            style={{ background: tab === t ? "rgba(163,230,53,0.12)" : "rgba(255,255,255,0.04)", border: tab === t ? "1px solid rgba(163,230,53,0.3)" : "1px solid rgba(255,255,255,0.06)", fontSize: 12, fontWeight: tab === t ? 600 : 400, color: tab === t ? "#A3E635" : "#71717A" }}>
             {t === "message" ? <MessageSquare size={13} strokeWidth={2} /> : <FileText size={13} strokeWidth={2} />}
             {t === "message" ? "Direct Message" : "Send Resume"}
           </button>
@@ -375,10 +715,10 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
         {tab === "message" && (
           <>
             {/* Context card */}
-            <div className="rounded-xl p-3" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
+            <div className="rounded-xl p-3" style={{ background: "rgba(163,230,53,0.05)", border: "1px solid rgba(163,230,53,0.15)" }}>
               <div className="flex items-center gap-1.5 mb-1">
-                <Sparkles size={11} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--accent-highlight)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>AI-drafted · Trajectory-aware</span>
+                <Sparkles size={11} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#A3E635", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>AI-drafted · Trajectory-aware</span>
               </div>
               <p style={{ fontSize: 11, color: "#A1A1AA", lineHeight: 1.55 }}>{employer.whyYou}</p>
             </div>
@@ -398,9 +738,9 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
             {/* Attach resume toggle */}
             <button onClick={() => setResumeAttached((p) => !p)}
               className="flex items-center gap-2 rounded-lg px-3 py-2.5 w-full"
-              style={{ background: resumeAttached ? "var(--accent-highlight-bg)" : "var(--accent)", border: resumeAttached ? "1px solid var(--accent-highlight-border)" : "1px solid var(--border)" }}>
-              <Paperclip size={13} style={{ color: resumeAttached ? "var(--accent-highlight)" : "var(--muted-foreground)" }} strokeWidth={2} />
-              <span style={{ fontSize: 12, color: resumeAttached ? "var(--accent-highlight)" : "var(--muted-foreground)", fontWeight: resumeAttached ? 600 : 400 }}>
+              style={{ background: resumeAttached ? "rgba(163,230,53,0.08)" : "rgba(255,255,255,0.04)", border: resumeAttached ? "1px solid rgba(163,230,53,0.25)" : "1px solid rgba(255,255,255,0.07)" }}>
+              <Paperclip size={13} style={{ color: resumeAttached ? "#A3E635" : "#71717A" }} strokeWidth={2} />
+              <span style={{ fontSize: 12, color: resumeAttached ? "#A3E635" : "#71717A", fontWeight: resumeAttached ? 600 : 400 }}>
                 {resumeAttached ? "Living Resume attached ✓" : "Attach Living Resume"}
               </span>
             </button>
@@ -408,98 +748,23 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
         )}
 
         {tab === "resume" && (
-          <>
-            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-              {/* Resume header */}
-              <div className="px-4 py-4" style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>Jordan Park</p>
-                    <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>Sr. Portfolio Optimization Specialist</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
-                    <BadgeCheck size={11} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
-                    <span style={{ fontSize: 9, color: "var(--accent-highlight)", fontWeight: 600, fontFamily: "var(--font-mono)" }}>VERIFIED</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sections */}
-              {[
-                {
-                  title: "Key Skills",
-                  content: (
-                    <div className="flex flex-wrap gap-1.5">
-                      {["Apache Kafka", "Rust", "C++20", "Delta Lake", "LangChain", "Apache Flink", "dbt", "Airflow"].map((s) => (
-                        <span key={s} className="rounded-md px-2 py-0.5" style={{ fontSize: 10, background: "rgba(255,255,255,0.06)", color: "#A1A1AA", border: "1px solid rgba(255,255,255,0.08)", fontFamily: "var(--font-mono)" }}>{s}</span>
-                      ))}
-                    </div>
-                  ),
-                },
-                {
-                  title: "Experience",
-                  content: (
-                    <div className="space-y-2.5">
-                      {[
-                        { role: "Senior Data Engineer", org: "Stripe", period: "2021–2023", note: "Streaming pipeline migration, T+90s data freshness" },
-                        { role: "Data Engineer", org: "Confluent", period: "2019–2021", note: "4B events/day ingestion, real-time infra" },
-                      ].map((e) => (
-                        <div key={e.org}>
-                          <div className="flex items-center justify-between">
-                            <span style={{ fontSize: 12, fontWeight: 600, color: "#E4E4E7" }}>{e.role}</span>
-                            <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>{e.period}</span>
-                          </div>
-                          <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{e.org} · {e.note}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ),
-                },
-                {
-                  title: "Verified Portfolio",
-                  content: (
-                    <div className="space-y-1.5">
-                      {["low-latency-cpp-infra · 2.1k ⭐", "kafka-lag-exporter · 1.2k ⭐ · Rust", "delta-lake-compaction-patch · merged to Apache Delta"].map((p) => (
-                        <div key={p} className="flex items-center gap-2">
-                          <CheckCircle2 size={10} style={{ color: "#A3E635" }} strokeWidth={2.5} />
-                          <span style={{ fontSize: 11, color: "#A1A1AA", fontFamily: "var(--font-mono)" }}>{p}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ),
-                },
-              ].map(({ title, content }) => (
-                <div key={title} className="px-4 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                  <p style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>{title}</p>
-                  {content}
-                </div>
-              ))}
-            </div>
-
-            {/* Cover note */}
-            <div>
-              <p style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Cover Note (optional)</p>
-              <textarea rows={4} placeholder="Add a short note to accompany your resume…"
-                className="w-full rounded-xl px-4 py-3 outline-none resize-none"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", fontSize: 13, color: "#E4E4E7", lineHeight: 1.65, fontFamily: "var(--font-sans)" }} />
-            </div>
-          </>
+          <ResumeBuilder employer={employer} />
         )}
       </div>
 
       {/* Send CTA */}
       <div className="px-5 pb-8 pt-3 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
         {sent ? (
-          <div className="flex items-center justify-center gap-2 rounded-xl py-3" style={{ background: "var(--accent-highlight-bg)", border: "1px solid var(--accent-highlight-border)" }}>
-            <CheckCircle2 size={15} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-highlight)" }}>
+          <div className="flex items-center justify-center gap-2 rounded-xl py-3" style={{ background: "rgba(163,230,53,0.12)", border: "1px solid rgba(163,230,53,0.3)" }}>
+            <CheckCircle2 size={15} style={{ color: "#A3E635" }} strokeWidth={2.5} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#A3E635" }}>
               {tab === "message" ? "Message sent!" : "Resume sent!"}
             </span>
           </div>
         ) : (
           <button onClick={handleSend}
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3 transition-opacity"
-            style={{ background: "var(--accent-highlight)", fontSize: 13, fontWeight: 700, color: "var(--primary-foreground)" }}>
+            style={{ background: "#A3E635", fontSize: 13, fontWeight: 700, color: "#0A0A0A" }}>
             <Send size={14} strokeWidth={2.5} />
             {tab === "message" ? `Send to ${employer.name}` : `Send Resume to ${employer.name}`}
           </button>
@@ -529,30 +794,30 @@ function EmployerDiscovery() {
       <div className="px-5 pt-5 pb-3">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
               Reach Out
             </span>
-            <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>Employers matched to your arc</p>
+            <p style={{ fontSize: 11, color: "#52525B", marginTop: 2 }}>Employers matched to your arc</p>
           </div>
-          <span className="rounded-full px-2.5 py-1" style={{ fontSize: 9, fontWeight: 600, background: "var(--accent-highlight-bg)", color: "var(--accent-highlight)", border: "1px solid var(--accent-highlight-border)", fontFamily: "var(--font-mono)" }}>
+          <span className="rounded-full px-2.5 py-1" style={{ fontSize: 9, fontWeight: 600, background: "rgba(163,230,53,0.08)", color: "#A3E635", border: "1px solid rgba(163,230,53,0.2)", fontFamily: "var(--font-mono)" }}>
             {employers.filter((e) => e.hiring).length} HIRING
           </span>
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 rounded-xl px-3" style={{ background: "var(--input-background)", border: "1px solid var(--border)", height: 38 }}>
-          <Search size={13} style={{ color: "var(--muted-foreground)" }} strokeWidth={2} />
+        <div className="flex items-center gap-2 rounded-xl px-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", height: 38 }}>
+          <Search size={13} style={{ color: "#52525B" }} strokeWidth={2} />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search companies, roles, industries…"
             className="flex-1 bg-transparent outline-none"
-            style={{ fontSize: 12, color: "var(--foreground)" }}
+            style={{ fontSize: 12, color: "#E4E4E7" }}
           />
           {query && (
             <button onClick={() => setQuery("")}>
-              <X size={12} style={{ color: "var(--muted-foreground)" }} />
+              <X size={12} style={{ color: "#52525B" }} />
             </button>
           )}
         </div>
@@ -567,7 +832,7 @@ function EmployerDiscovery() {
               key={employer.id}
               onClick={() => setSelected(employer)}
               className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150"
-              style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
             >
               <div className="flex items-start gap-3 px-4 py-3.5">
                 {/* Logo */}
@@ -578,9 +843,9 @@ function EmployerDiscovery() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{employer.name}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{employer.name}</span>
                       {employer.hiring && (
-                        <span className="rounded-full px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: "var(--accent-highlight-bg)", color: "var(--accent-highlight)", fontFamily: "var(--font-mono)" }}>HIRING</span>
+                        <span className="rounded-full px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: "rgba(163,230,53,0.10)", color: "#A3E635", fontFamily: "var(--font-mono)" }}>HIRING</span>
                       )}
                     </div>
                     <span className="rounded-md px-2 py-0.5 shrink-0" style={{ fontSize: 10, fontWeight: 700, background: fit.bg, color: fit.text, fontFamily: "var(--font-mono)" }}>
@@ -588,28 +853,28 @@ function EmployerDiscovery() {
                     </span>
                   </div>
 
-                  <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }} className="truncate">{employer.openRole}</p>
+                  <p style={{ fontSize: 11, color: "#71717A", marginTop: 2 }} className="truncate">{employer.openRole}</p>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "var(--muted-foreground)" }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#52525B" }}>
                       <Building2 size={9} strokeWidth={2} />{employer.industry}
                     </span>
-                    <span style={{ color: "var(--border)", fontSize: 10 }}>·</span>
-                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "var(--muted-foreground)" }}>
+                    <span style={{ color: "#3F3F46", fontSize: 10 }}>·</span>
+                    <span className="flex items-center gap-1" style={{ fontSize: 10, color: "#52525B" }}>
                       <MapPin size={9} strokeWidth={2} />{employer.location}
                     </span>
                   </div>
                 </div>
 
-                <ChevronRight size={14} style={{ color: "var(--muted-foreground)", marginTop: 2, flexShrink: 0 }} />
+                <ChevronRight size={14} style={{ color: "#3F3F46", marginTop: 2, flexShrink: 0 }} />
               </div>
 
               {/* Fit label strip */}
               <div className="px-4 pb-3 flex items-center gap-1.5">
                 <TrendingUp size={10} style={{ color: fit.text }} strokeWidth={2.5} />
                 <span style={{ fontSize: 10, color: fit.text, fontWeight: 500 }}>{employer.fitLabel}</span>
-                <span style={{ fontSize: 10, color: "var(--border)" }}>·</span>
-                <span style={{ fontSize: 10, color: "var(--muted-foreground)" }}>{employer.stage} · {employer.teamSize}</span>
+                <span style={{ fontSize: 10, color: "#3F3F46" }}>·</span>
+                <span style={{ fontSize: 10, color: "#52525B" }}>{employer.stage} · {employer.teamSize}</span>
               </div>
             </button>
           );
@@ -627,7 +892,7 @@ function EmployerDiscovery() {
 }
 
 /* ─── Navigator Tab ─── */
-export function NavigatorTab() {
+function NavigatorTab() {
   const [expandedRoute, setExpandedRoute] = useState<string | null>("pred-1");
   const [coachDismissed, setCoachDismissed] = useState(false);
 
@@ -637,18 +902,18 @@ export function NavigatorTab() {
       <EmployerDiscovery />
 
       {/* Divider */}
-      <div className="mx-5 my-1" style={{ height: 1, background: "var(--border)" }} />
+      <div className="mx-5 my-1" style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
 
       <div className="px-5 pt-4 pb-1 flex items-center justify-between">
-        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
           Career Arc · Timeline
         </span>
-        <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>5 nodes</span>
+        <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>5 nodes</span>
       </div>
 
       <div className="px-5 pb-2">
         <div className="relative">
-          <div className="absolute" style={{ left: 11, top: 12, bottom: 12, width: 1, background: "linear-gradient(to bottom, var(--border), transparent)" }} />
+          <div className="absolute" style={{ left: 11, top: 12, bottom: 12, width: 1, background: "linear-gradient(to bottom, #3F3F46, #27272A 60%, transparent)" }} />
           <div className="space-y-0">
             {timelineMilestones.map((m, i) => {
               const isPredicted = m.type === "predicted";
@@ -657,22 +922,22 @@ export function NavigatorTab() {
               return (
                 <div key={m.id} className="relative flex gap-3">
                   <div className="flex flex-col items-center shrink-0" style={{ width: 23 }}>
-                    <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 23, height: 23, background: isCurrent ? "var(--accent-highlight)" : isPredicted ? routeColors[(m as any).route].bg : "var(--accent)", border: isCurrent ? "2px solid var(--accent-highlight)" : isPredicted ? `1.5px solid ${routeColors[(m as any).route].dot}` : "1.5px solid var(--border)", zIndex: 1 }}>
-                      {isCurrent ? <CircleDot size={10} color="var(--primary-foreground)" strokeWidth={3} /> : isPredicted ? <span style={{ fontSize: 8, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).route}</span> : <CheckCircle2 size={10} color="var(--muted-foreground)" strokeWidth={2.5} />}
+                    <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 23, height: 23, background: isCurrent ? "#A3E635" : isPredicted ? routeColors[(m as any).route].bg : "rgba(255,255,255,0.06)", border: isCurrent ? "2px solid #A3E635" : isPredicted ? `1.5px solid ${routeColors[(m as any).route].dot}` : "1.5px solid #3F3F46", zIndex: 1 }}>
+                      {isCurrent ? <CircleDot size={10} color="#0A0A0A" strokeWidth={3} /> : isPredicted ? <span style={{ fontSize: 8, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).route}</span> : <CheckCircle2 size={10} color="#52525B" strokeWidth={2.5} />}
                     </div>
                   </div>
-                  <div className="flex-1 mb-3 rounded-xl overflow-hidden" style={{ background: isCurrent ? "var(--accent-highlight-bg)" : isPredicted ? routeColors[(m as any).route].bg : "var(--card)", border: isCurrent ? "1px solid var(--accent-highlight-border)" : isPredicted ? `1px solid ${routeColors[(m as any).route].dot}22` : "1px solid var(--border)" }}>
+                  <div className="flex-1 mb-3 rounded-xl overflow-hidden" style={{ background: isCurrent ? "rgba(163,230,53,0.04)" : isPredicted ? routeColors[(m as any).route].bg : "rgba(255,255,255,0.03)", border: isCurrent ? "1px solid rgba(163,230,53,0.20)" : isPredicted ? `1px solid ${routeColors[(m as any).route].dot}22` : "1px solid rgba(255,255,255,0.05)" }}>
                     <button className="w-full text-left p-3" onClick={() => isPredicted && setExpandedRoute(isExpanded ? null : m.id)}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {isPredicted && <span style={{ fontSize: 9, fontWeight: 600, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Route {(m as any).route}</span>}
-                            {isCurrent && <span style={{ fontSize: 9, fontWeight: 600, color: "var(--accent-highlight)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Current</span>}
-                            {m.type === "past" && <span style={{ fontSize: 9, fontWeight: 500, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Past · Verified</span>}
+                            {isCurrent && <span style={{ fontSize: 9, fontWeight: 600, color: "#A3E635", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Current</span>}
+                            {m.type === "past" && <span style={{ fontSize: 9, fontWeight: 500, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Past · Verified</span>}
                           </div>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)", marginTop: 2, letterSpacing: "-0.01em" }}>{m.title}</p>
-                          {!isPredicted && <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{(m as any).org}</p>}
-                          {isPredicted && <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{(m as any).orgs?.join(" · ")}</p>}
+                          <p style={{ fontSize: 13, fontWeight: 600, color: "#F5F5F5", marginTop: 2, letterSpacing: "-0.01em" }}>{m.title}</p>
+                          {!isPredicted && <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{(m as any).org}</p>}
+                          {isPredicted && <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{(m as any).orgs?.join(" · ")}</p>}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isPredicted && <span style={{ fontSize: 11, fontWeight: 700, color: routeColors[(m as any).route].text, fontFamily: "var(--font-mono)" }}>{(m as any).confidence}%</span>}
@@ -682,14 +947,14 @@ export function NavigatorTab() {
                       {!isPredicted && (m as any).skills && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {(m as any).skills.map((s: string) => (
-                            <span key={s} style={{ fontSize: 9, background: "var(--accent)", color: "var(--muted-foreground)", borderRadius: 4, padding: "2px 6px", fontFamily: "var(--font-mono)" }}>{s}</span>
+                            <span key={s} style={{ fontSize: 9, background: "rgba(255,255,255,0.06)", color: "#A1A1AA", borderRadius: 4, padding: "2px 6px", fontFamily: "var(--font-mono)" }}>{s}</span>
                           ))}
                         </div>
                       )}
                     </button>
                     {isPredicted && isExpanded && (
                       <div style={{ borderTop: `1px solid ${routeColors[(m as any).route].dot}18`, padding: "10px 12px 12px" }}>
-                        <p style={{ fontSize: 12, color: "var(--muted-foreground)", lineHeight: 1.55 }}>{(m as any).rationale}</p>
+                        <p style={{ fontSize: 12, color: "#A1A1AA", lineHeight: 1.55 }}>{(m as any).rationale}</p>
                         <button className="flex items-center gap-1.5 mt-2.5 rounded-lg px-3 py-1.5" style={{ background: routeColors[(m as any).route].bg, border: `1px solid ${routeColors[(m as any).route].dot}33` }}>
                           <TrendingUp size={11} style={{ color: routeColors[(m as any).route].text }} strokeWidth={2.5} />
                           <span style={{ fontSize: 11, color: routeColors[(m as any).route].text, fontWeight: 600 }}>Explore this path</span>
@@ -707,32 +972,32 @@ export function NavigatorTab() {
       {/* Living Portfolio card */}
       <div className="px-5 pt-1 pb-2">
         <div className="flex items-center justify-between mb-3">
-          <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>Living Portfolio · Real-time</span>
-          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>Syncing</span></div>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>Living Portfolio · Real-time</span>
+          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>Syncing</span></div>
         </div>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
-            <div className="flex items-center gap-2"><Zap size={13} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} /><span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>Proof of Capability Feed</span></div>
-            <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>4 verified</span>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <div className="flex items-center gap-2"><Zap size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} /><span style={{ fontSize: 12, fontWeight: 600, color: "#F5F5F5" }}>Proof of Capability Feed</span></div>
+            <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>4 verified</span>
           </div>
           {portfolioSamples.slice(0, 3).map((item, i) => (
-            <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--accent)", border: "1px solid var(--border)" }}>
+            <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <PortfolioIcon type={item.icon} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5"><span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>{item.title}</span><CheckCircle2 size={10} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} /></div>
-                <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }} className="truncate">{item.subtitle}</p>
+                <div className="flex items-center gap-1.5"><span style={{ fontSize: 12, fontWeight: 600, color: "#E4E4E7" }}>{item.title}</span><CheckCircle2 size={10} style={{ color: "#A3E635" }} strokeWidth={2.5} /></div>
+                <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }} className="truncate">{item.subtitle}</p>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
                 <span className="rounded-md px-1.5 py-0.5" style={{ fontSize: 9, fontWeight: 600, background: `${item.tagColor}18`, color: item.tagColor, fontFamily: "var(--font-mono)" }}>{item.tag}</span>
-                <span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>{item.age}</span>
+                <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>{item.age}</span>
               </div>
             </div>
           ))}
-          <button className="w-full flex items-center justify-center gap-1.5 py-3" style={{ borderTop: "1px solid var(--border)" }}>
-            <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontWeight: 500 }}>View full portfolio</span>
-            <ArrowUpRight size={11} style={{ color: "var(--muted-foreground)" }} />
+          <button className="w-full flex items-center justify-center gap-1.5 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+            <span style={{ fontSize: 11, color: "#52525B", fontWeight: 500 }}>View full portfolio</span>
+            <ArrowUpRight size={11} style={{ color: "#52525B" }} />
           </button>
         </div>
       </div>
@@ -767,7 +1032,7 @@ export function NavigatorTab() {
 }
 
 /* ─── Portfolio Tab ─── */
-export function PortfolioTab() {
+function PortfolioTab() {
   const [selected, setSelected] = useState<PortfolioSample | null>(null);
 
   return (
@@ -776,10 +1041,10 @@ export function PortfolioTab() {
 
       <div className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div>
-          <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>My Portfolio</span>
-          <div className="flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>4 items · All verified</span></div>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#52525B", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>My Portfolio</span>
+          <div className="flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>4 items · All verified</span></div>
         </div>
-        <span className="rounded-full px-2.5 py-1" style={{ fontSize: 10, fontWeight: 600, background: "var(--accent-highlight-bg)", color: "var(--accent-highlight)", border: "1px solid var(--accent-highlight-border)", fontFamily: "var(--font-mono)" }}>LIVE</span>
+        <span className="rounded-full px-2.5 py-1" style={{ fontSize: 10, fontWeight: 600, background: "rgba(163,230,53,0.08)", color: "#A3E635", border: "1px solid rgba(163,230,53,0.2)", fontFamily: "var(--font-mono)" }}>LIVE</span>
       </div>
 
       <div className="px-5 pb-4 space-y-3">
@@ -788,19 +1053,19 @@ export function PortfolioTab() {
             key={sample.id}
             onClick={() => setSelected(sample)}
             className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150"
-            style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             {/* Card header */}
-            <div className="flex items-start gap-3 p-4" style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="flex items-start gap-3 p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${sample.tagColor}14`, border: `1px solid ${sample.tagColor}28` }}>
                 <PortfolioIcon type={sample.icon} size={16} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{sample.title}</span>
-                  {sample.verified && <CheckCircle2 size={11} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />}
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{sample.title}</span>
+                  {sample.verified && <CheckCircle2 size={11} style={{ color: "#A3E635" }} strokeWidth={2.5} />}
                 </div>
-                <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{sample.subtitle}</p>
+                <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }}>{sample.subtitle}</p>
               </div>
               <div className="flex flex-col items-end gap-1.5 shrink-0">
                 <span className="rounded-md px-2 py-0.5" style={{ fontSize: 9, fontWeight: 700, background: `${sample.tagColor}18`, color: sample.tagColor, fontFamily: "var(--font-mono)" }}>{sample.tag}</span>
@@ -833,7 +1098,7 @@ export function PortfolioTab() {
 }
 
 /* ─── Coach Tab ─── */
-export function CoachTab() {
+function CoachTab() {
   const [messages, setMessages] = useState<ChatMsg[]>(initialMessages);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -861,8 +1126,8 @@ export function CoachTab() {
           <Sparkles size={14} style={{ color: "#A78BFA" }} strokeWidth={2} />
         </div>
         <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>Senior AI Career Coach</p>
-          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>Online · Monitoring your signals</span></div>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#F5F5F5" }}>Senior AI Career Coach</p>
+          <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} /><span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>Online · Monitoring your signals</span></div>
         </div>
       </div>
 
@@ -935,7 +1200,7 @@ export function CoachTab() {
 }
 
 /* ─── Pay Tab ─── */
-export function PayTab() {
+function PayTab() {
   return (
     <div className="px-5 pt-5 flex flex-col gap-4">
       <div>
@@ -975,23 +1240,23 @@ export function EmployeeView() {
       </div>
 
       {/* Top Nav */}
-      <div className="flex items-center justify-between px-5 shrink-0" style={{ height: 60, borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
+      <div className="flex items-center justify-between px-5 shrink-0" style={{ height: 60, borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(10,10,10,0.95)" }}>
         <div>
           <div className="flex items-center gap-1.5">
-            <span style={{ fontSize: 15, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.02em" }}>Jordan Park</span>
-            <ShieldCheck size={13} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.02em" }}>Jordan Park</span>
+            <ShieldCheck size={13} style={{ color: "#A3E635" }} strokeWidth={2.5} />
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "var(--accent-highlight-bg)", fontSize: 10, color: "var(--accent-highlight)", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} />
+            <span className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(163,230,53,0.10)", fontSize: 10, color: "#A3E635", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A3E635" }} />
               LIVING PORTFOLIO · ACTIVE
             </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="relative flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: "var(--accent)", border: "1px solid var(--border)" }}>
-            <Bell size={15} style={{ color: "var(--muted-foreground)" }} strokeWidth={1.8} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: "var(--accent-highlight)", border: "1.5px solid var(--border)" }} />
+          <button className="relative flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <Bell size={15} style={{ color: "#A1A1AA" }} strokeWidth={1.8} />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: "#A3E635", border: "1.5px solid #0A0A0A" }} />
           </button>
           <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3730A3, #7C3AED)", fontSize: 12, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono)" }}>JP</div>
         </div>
@@ -1006,13 +1271,13 @@ export function EmployeeView() {
       </div>
 
       {/* Bottom Tab Bar */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-around shrink-0" style={{ height: 80, paddingBottom: 16, background: "var(--card)", borderTop: "1px solid var(--border)", backdropFilter: "blur(20px)" }}>
+      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-around shrink-0" style={{ height: 80, paddingBottom: 16, background: "rgba(10,10,10,0.96)", borderTop: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(20px)" }}>
         {tabItems.map(({ id, icon, label }) => {
           const active = activeTab === id;
           return (
             <button key={id} onClick={() => setActiveTab(id)} className="flex flex-col items-center gap-1 transition-all duration-150" style={{ minWidth: 60 }}>
-              <div style={{ color: active ? "var(--accent-highlight)" : "var(--muted-foreground)", transform: active ? "scale(1.05)" : "scale(1)", transition: "all 0.15s" }}>{icon}</div>
-              <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: active ? "var(--accent-highlight)" : "var(--muted-foreground)", letterSpacing: "-0.01em" }}>{label}</span>
+              <div style={{ color: active ? "#A3E635" : "#52525B", transform: active ? "scale(1.05)" : "scale(1)", transition: "all 0.15s" }}>{icon}</div>
+              <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: active ? "#A3E635" : "#52525B", letterSpacing: "-0.01em" }}>{label}</span>
             </button>
           );
         })}
