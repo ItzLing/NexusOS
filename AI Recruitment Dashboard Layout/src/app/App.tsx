@@ -14,6 +14,27 @@ import { ActiveMatchesView } from "./components/ActiveMatchesView";
 import { LoginPage } from "./components/LoginPage";
 import { EmployeeShell } from "./components/EmployeeShell";
 
+export interface JobApplicationUpdate {
+  status: string;
+  label: string;
+  time: string;
+  description: string;
+}
+
+export interface JobApplication {
+  id: string;
+  employerId: string;
+  employerName: string;
+  openRole: string;
+  logo: string;
+  logoBg: string;
+  status: 'sent' | 'read' | 'interviewing' | 'hired';
+  submittedAt: string;
+  attachedResume: boolean;
+  coverNote: string;
+  updates: JobApplicationUpdate[];
+}
+
 import { CareerOSApplicationShell, MockInitializer } from "../../../src";
 
 export const shell = new CareerOSApplicationShell();
@@ -480,9 +501,11 @@ interface EmployerShellProps {
   onSignOut: () => void;
   theme: "light" | "dark";
   onToggleTheme: () => void;
+  applications: JobApplication[];
+  onUpdateApplicationStatus: (employerId: string, status: 'sent' | 'read' | 'interviewing' | 'hired') => void;
 }
 
-function EmployerShell({ onSignOut, theme, onToggleTheme }: EmployerShellProps) {
+function EmployerShell({ onSignOut, theme, onToggleTheme, applications, onUpdateApplicationStatus }: EmployerShellProps) {
   const [employerView, setEmployerView] = useState<EmployerView>("pipeline");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -632,7 +655,13 @@ function EmployerShell({ onSignOut, theme, onToggleTheme }: EmployerShellProps) 
           {/* Desktop views */}
           <div className="flex flex-1 overflow-hidden">
             {employerView === "pipeline" && <PipelineView onInitiateIntro={handleInitiateIntro} />}
-            {employerView === "matches" && <ActiveMatchesView onFastTrack={handleInitiateIntro} />}
+            {employerView === "matches" && (
+              <ActiveMatchesView
+                onFastTrack={handleInitiateIntro}
+                applications={applications}
+                onUpdateApplicationStatus={onUpdateApplicationStatus}
+              />
+            )}
             {employerView === "roles" && <OpenRolesView />}
             {employerView === "messages" && (
               <EmployerChatbox candidateName={chatIntroName} prefilledMessage={chatPrefilledMsg} onClose={() => setEmployerView("pipeline")} />
@@ -673,7 +702,11 @@ function EmployerShell({ onSignOut, theme, onToggleTheme }: EmployerShellProps) 
           {employerView === "pipeline" && <MobilePipelineView onInitiateIntro={handleInitiateIntro} />}
           {employerView === "matches" && (
             <div className="h-full overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 96 }}>
-              <ActiveMatchesView onFastTrack={handleInitiateIntro} />
+              <ActiveMatchesView
+                onFastTrack={handleInitiateIntro}
+                applications={applications}
+                onUpdateApplicationStatus={onUpdateApplicationStatus}
+              />
             </div>
           )}
           {employerView === "roles" && (
@@ -848,6 +881,186 @@ export default function App() {
   const [authRole, setAuthRole] = useState<AuthRole | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
+  const [applications, setApplications] = useState<JobApplication[]>([
+    {
+      id: "app-cohere",
+      employerId: "e2",
+      employerName: "Cohere",
+      openRole: "AI Platform Lead",
+      logo: "CO",
+      logoBg: "#7C3AED",
+      status: "interviewing",
+      submittedAt: "2 days ago",
+      attachedResume: true,
+      coverNote: "Hi Cohere team, I came across the AI Platform Lead role and wanted to reach out directly. My background in distributed systems and data infrastructure — including open-source work on Kafka tooling and Delta Lake — maps closely to what you're building.",
+      updates: [
+        { status: "sent", label: "Application Sent", time: "2 days ago", description: "Your resume and portfolio were successfully sent to Cohere." },
+        { status: "read", label: "Opened by Recruiter", time: "2 days ago", description: "Cohere's technical recruiting team has opened and reviewed your trajectory." },
+        { status: "interviewing", label: "Interview Stage", time: "Yesterday", description: "You have been fast-tracked to the interview stage. Calendar coordinator will reach out." }
+      ]
+    },
+    {
+      id: "app-cloudflare",
+      employerId: "e3",
+      employerName: "Cloudflare",
+      openRole: "Staff Systems Engineer",
+      logo: "CF",
+      logoBg: "#1D4E89",
+      status: "read",
+      submittedAt: "Yesterday",
+      attachedResume: true,
+      coverNote: "Hi Cloudflare team, my low-latency C++ and Systems programming background maps closely to what your workers runtime team is building.",
+      updates: [
+        { status: "sent", label: "Application Sent", time: "Yesterday", description: "Your resume and portfolio were successfully sent to Cloudflare." },
+        { status: "read", label: "Opened by Recruiter", time: "Yesterday", description: "Cloudflare's sourcing team has reviewed your verified systems engineering milestones." }
+      ]
+    }
+  ]);
+
+  const [employeeNotifs, setEmployeeNotifs] = useState([
+    { id: "en1", dot: "#A3E635", text: "New employer match: Databricks at 94% trajectory fit", time: "1h ago" },
+    { id: "en2", dot: "#A78BFA", text: "AI Coach: Market signal — your bracket is underpaid by 12%", time: "3h ago" },
+    { id: "en3", dot: "#38BDF8", text: "Cloudflare has flagged your profile for their talent pipeline", time: "Yesterday" },
+    { id: "en4", dot: "#F472B6", text: "kafka-lag-exporter crossed 1.2k GitHub stars", time: "2 days ago" },
+  ]);
+
+  const handleApply = (employerId: string, coverNote: string) => {
+    const employerData = {
+      e1: { name: "Databricks", logo: "DB", logoBg: "#C2410C", openRole: "Staff Data Infrastructure Eng." },
+      e2: { name: "Cohere", logo: "CO", logoBg: "#7C3AED", openRole: "AI Platform Lead" },
+      e3: { name: "Cloudflare", logo: "CF", logoBg: "#1D4E89", openRole: "Staff Systems Engineer" },
+      e4: { name: "Anyscale", logo: "AY", logoBg: "#065F46", openRole: "AI Infrastructure Engineer" },
+      e5: { name: "Mistral AI", logo: "MI", logoBg: "#92400E", openRole: "Platform Engineer" }
+    }[employerId as 'e1'|'e2'|'e3'|'e4'|'e5'];
+
+    if (!employerData) return;
+    if (applications.some(app => app.employerId === employerId)) return;
+
+    const newApp: JobApplication = {
+      id: `app-${employerId}`,
+      employerId,
+      employerName: employerData.name,
+      openRole: employerData.openRole,
+      logo: employerData.logo,
+      logoBg: employerData.logoBg,
+      status: "sent",
+      submittedAt: "Just now",
+      attachedResume: true,
+      coverNote: coverNote,
+      updates: [
+        { status: "sent", label: "Application Sent", time: "Just now", description: "Your resume and portfolio were successfully sent to " + employerData.name + "." }
+      ]
+    };
+
+    setApplications(prev => [newApp, ...prev]);
+
+    if (employerId === "e1") {
+      setTimeout(() => {
+        setApplications(prev => prev.map(app => {
+          if (app.employerId === "e1") {
+            return {
+              ...app,
+              status: "read",
+              updates: [
+                ...app.updates,
+                { status: "read", label: "Opened by Recruiter", time: "Just now", description: "Databricks recruiting team has opened and reviewed your trajectory profile." }
+              ]
+            };
+          }
+          return app;
+        }));
+
+        setEmployeeNotifs(prev => [
+          { id: `en-read-${Date.now()}`, dot: "#38BDF8", text: "Databricks opened your application and reviewed your portfolio", time: "Just now" },
+          ...prev
+        ]);
+      }, 5000);
+
+      setTimeout(() => {
+        setApplications(prev => prev.map(app => {
+          if (app.employerId === "e1" && app.status === "read") {
+            return {
+              ...app,
+              status: "interviewing",
+              updates: [
+                ...app.updates,
+                { status: "interviewing", label: "Interview Stage", time: "Just now", description: "Congratulations! Databricks has fast-tracked your application to the Interview stage. Recruiter has requested availability." }
+              ]
+            };
+          }
+          return app;
+        }));
+
+        setEmployeeNotifs(prev => [
+          { id: `en-interview-${Date.now()}`, dot: "#A3E635", text: "Databricks has fast-tracked your application to the Interviewing stage", time: "Just now" },
+          ...prev
+        ]);
+      }, 15000);
+    }
+  };
+
+  const handleUpdateApplicationStatus = (employerId: string, status: 'sent' | 'read' | 'interviewing' | 'hired') => {
+    setApplications(prev => {
+      const exists = prev.some(app => app.employerId === employerId);
+      if (!exists && employerId === "e1") {
+        const newApp: JobApplication = {
+          id: "app-e1",
+          employerId: "e1",
+          employerName: "Databricks",
+          openRole: "Staff Data Infrastructure Eng.",
+          logo: "DB",
+          logoBg: "#C2410C",
+          status,
+          submittedAt: "Just now",
+          attachedResume: true,
+          coverNote: "Hi Databricks team, I'm reaching out regarding the Staff Data Infrastructure Engineer position.",
+          updates: [
+            { status: "sent", label: "Application Sent", time: "Just now", description: "Application automatically synchronized with employer match pipeline." },
+            { status, label: status === "interviewing" ? "Interview Stage" : status === "hired" ? "Hired / Onboarding" : "Status Updated", time: "Just now", description: status === "interviewing" ? "You have been fast-tracked to the interview stage." : status === "hired" ? "Congratulations! You have been hired. Onboarding gateway is now active." : `Status updated to ${status}` }
+          ]
+        };
+        return [newApp, ...prev];
+      }
+
+      return prev.map(app => {
+        if (app.employerId === employerId) {
+          if (app.status === status) return app;
+          let label = "Application Update";
+          let description = "Status updated to " + status;
+          if (status === "interviewing") {
+            label = "Interview Stage";
+            description = "You have been fast-tracked to the interview stage.";
+          } else if (status === "hired") {
+            label = "Hired / Onboarding";
+            description = "Congratulations! You have been hired. Onboarding gateway is now active.";
+          }
+
+          return {
+            ...app,
+            status,
+            updates: [
+              ...app.updates,
+              { status, label, time: "Just now", description }
+            ]
+          };
+        }
+        return app;
+      });
+    });
+
+    if (status === "interviewing") {
+      setEmployeeNotifs(prev => [
+        { id: `en-int-up-${Date.now()}`, dot: "#A3E635", text: `Databricks fast-tracked your application to the Interviewing stage`, time: "Just now" },
+        ...prev
+      ]);
+    } else if (status === "hired") {
+      setEmployeeNotifs(prev => [
+        { id: `en-hire-up-${Date.now()}`, dot: "#A3E635", text: `Congratulations! Databricks has completed hiring. Access your Onboarding Gateway!`, time: "Just now" },
+        ...prev
+      ]);
+    }
+  };
+
   useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
@@ -875,6 +1088,10 @@ export default function App() {
           onSignOut={() => setAuthRole(null)}
           theme={theme}
           onToggleTheme={toggleTheme}
+          applications={applications}
+          onApply={handleApply}
+          notifications={employeeNotifs}
+          setNotifications={setEmployeeNotifs}
         />
       )}
       {authRole === "employer" && (
@@ -882,6 +1099,8 @@ export default function App() {
           onSignOut={() => setAuthRole(null)}
           theme={theme}
           onToggleTheme={toggleTheme}
+          applications={applications}
+          onUpdateApplicationStatus={handleUpdateApplicationStatus}
         />
       )}
     </ErrorBoundary>

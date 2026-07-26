@@ -157,13 +157,27 @@ const employeeNotifications = [
   { id: "en4", dot: "#F472B6", text: "kafka-lag-exporter crossed 1.2k GitHub stars", time: "2 days ago" },
 ];
 
+import { JobApplication } from "../App";
+
 interface Props {
   onSignOut: () => void;
   theme: "light" | "dark";
   onToggleTheme: () => void;
+  applications: JobApplication[];
+  onApply: (employerId: string, coverNote: string) => void;
+  notifications: any[];
+  setNotifications: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
+export function EmployeeShell({
+  onSignOut,
+  theme,
+  onToggleTheme,
+  applications,
+  onApply,
+  notifications,
+  setNotifications,
+}: Props) {
   const [activeView, setActiveView] = useState<EmployeeViewTab>("navigator");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -171,11 +185,11 @@ export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [readNotifs, setReadNotifs] = useState<Set<string>>(new Set());
 
-  const unreadCount = employeeNotifications.filter((n) => !readNotifs.has(n.id)).length;
+  const unreadCount = notifications.filter((n) => !readNotifs.has(n.id)).length;
   const isCoach = activeView === "coach";
   const isMobileNotifications = activeView === "notifications";
 
-  const markAllRead = () => setReadNotifs(new Set(employeeNotifications.map((n) => n.id)));
+  const markAllRead = () => setReadNotifs(new Set(notifications.map((n) => n.id)));
 
   /* ─── Notification dropdown (shared markup) ─── */
   const NotifDropdown = ({ onClose }: { onClose: () => void }) => (
@@ -190,9 +204,9 @@ export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
     >
       <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <p style={{ fontSize: 13, fontWeight: 600, color: "#F5F5F5" }}>Notifications</p>
-        <p style={{ fontSize: 10, color: "#52525B", marginTop: 1 }}>4 recent alerts</p>
+        <p style={{ fontSize: 10, color: "#52525B", marginTop: 1 }}>{unreadCount} recent alerts</p>
       </div>
-      {employeeNotifications.map((n) => (
+      {notifications.map((n) => (
         <div
           key={n.id}
           className="flex items-start gap-3 px-4 py-3"
@@ -509,8 +523,17 @@ export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
                   className="rounded-2xl overflow-hidden"
                   style={{ background: "var(--background)", border: "1px solid var(--border)" }}
                 >
-                  {activeView === "navigator" && <NavigatorTab />}
-                  {activeView === "portfolio" && <PortfolioTab />}
+                  {activeView === "navigator" && (
+                    <NavigatorTab
+                      applications={applications}
+                      onApply={onApply}
+                    />
+                  )}
+                  {activeView === "portfolio" && (
+                    <PortfolioTab
+                      applications={applications}
+                    />
+                  )}
                   {activeView === "pay" && <PayTab />}
                 </div>
               </div>
@@ -581,8 +604,17 @@ export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
               className={isCoach ? "flex flex-col overflow-hidden" : ""}
               style={isCoach ? { height: 620 } : { paddingBottom: 24 }}
             >
-              {activeView === "navigator" && <NavigatorTab />}
-              {activeView === "portfolio" && <PortfolioTab />}
+              {activeView === "navigator" && (
+                <NavigatorTab
+                  applications={applications}
+                  onApply={onApply}
+                />
+              )}
+              {activeView === "portfolio" && (
+                <PortfolioTab
+                  applications={applications}
+                />
+              )}
               {activeView === "coach" && <CoachTab />}
               {activeView === "pay" && <PayTab />}
               {activeView === "notifications" && (
@@ -590,7 +622,7 @@ export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
                   <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
                     <div>
                       <p style={{ fontSize: 15, fontWeight: 700, color: "#F5F5F5" }}>Notifications</p>
-                      <p style={{ fontSize: 11, color: "#52525B", marginTop: 2 }}>{employeeNotifications.length} recent alerts</p>
+                      <p style={{ fontSize: 11, color: "#52525B", marginTop: 2 }}>{notifications.length} recent alerts</p>
                     </div>
                     <button
                       onClick={markAllRead}
@@ -599,7 +631,7 @@ export function EmployeeShell({ onSignOut, theme, onToggleTheme }: Props) {
                       Mark all read
                     </button>
                   </div>
-                  {employeeNotifications.map((n) => (
+                  {notifications.map((n) => (
                     <div
                       key={n.id}
                       className="flex items-start gap-4 px-5 py-4"

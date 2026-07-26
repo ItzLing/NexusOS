@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TrendingUp, Zap, CheckCircle2, ArrowUpRight, Filter, X } from "lucide-react";
+import { JobApplication } from "../App";
 
 interface Match {
   id: string;
@@ -103,14 +104,50 @@ const statusConfig = {
 
 interface Props {
   onFastTrack?: (candidateName: string) => void;
+  applications: JobApplication[];
+  onUpdateApplicationStatus: (employerId: string, status: 'sent' | 'read' | 'interviewing' | 'hired') => void;
 }
 
-export function ActiveMatchesView({ onFastTrack }: Props) {
+export function ActiveMatchesView({ onFastTrack, applications, onUpdateApplicationStatus }: Props) {
   const [matchData, setMatchData] = useState<Match[]>(initialMatches);
   const [selected, setSelected] = useState<Match>(matchData[0]);
   const [filterPhase, setFilterPhase] = useState<string>("All");
   const [filterStatus, setFilterStatus] = useState<string>("All");
   const [filterOpen, setFilterOpen] = useState(false);
+
+  // Sync Jordan Park's application status from App.tsx applications list
+  useEffect(() => {
+    const jordanApp = applications.find(app => app.employerId === "e1");
+    if (jordanApp) {
+      let matchStatus: Match["status"] = "new";
+      if (jordanApp.status === "read") matchStatus = "reviewing";
+      if (jordanApp.status === "interviewing" || jordanApp.status === "hired") matchStatus = "introduced";
+
+      setMatchData((prev) => prev.map((m) => m.id === "m1" ? { ...m, status: matchStatus } : m));
+      setSelected((prev) => prev.id === "m1" ? { ...prev, status: matchStatus } : prev);
+
+      if (jordanApp.status === "hired") {
+        setOnboardingRecords(prev => {
+          if (prev["m1"]) return prev;
+          return {
+            ...prev,
+            "m1": {
+              dependencies: ["Core Engineering Group", "Infrastructure Operations"],
+              milestones: [
+                { title: "1-on-1 Architecture Walkthrough", desc: "Review services, infrastructure topology, and deployment setups.", severity: "Low" },
+                { title: "Bridge Gap: FastAPI & LangChain Mentorship", desc: "Structured pairing to address backend & agentic framework gaps.", severity: "High" },
+                { title: "Bridge Gap: Python Development Guidelines", desc: "Ramp up on internal async design patterns.", severity: "Medium" }
+              ]
+            }
+          };
+        });
+      }
+    } else {
+      // If Jordan Park withdrawn or didn't apply, revert to new status for simulation
+      setMatchData((prev) => prev.map((m) => m.id === "m1" ? { ...m, status: "new" } : m));
+      setSelected((prev) => prev.id === "m1" ? { ...prev, status: "new" } : prev);
+    }
+  }, [applications]);
 
   const [scheduledMeetings, setScheduledMeetings] = useState<Record<string, { confirmedSlot: string; eventId: string; brief: string }>>({});
   const [onboardingRecords, setOnboardingRecords] = useState<Record<string, { dependencies: string[]; milestones: { title: string; desc: string; severity: string }[] }>>({});
@@ -130,11 +167,17 @@ export function ActiveMatchesView({ onFastTrack }: Props) {
   const handleFastTrack = () => {
     onFastTrack?.(selected.candidateName);
     updateMatchStatus(selected.id, "introduced");
+    if (selected.id === "m1") {
+      onUpdateApplicationStatus("e1", "interviewing");
+    }
   };
 
   const handleViewProfile = () => {
     if (selected.status === "new") {
       updateMatchStatus(selected.id, "reviewing");
+      if (selected.id === "m1") {
+        onUpdateApplicationStatus("e1", "read");
+      }
     }
   };
 
@@ -431,6 +474,9 @@ export function ActiveMatchesView({ onFastTrack }: Props) {
                             milestones
                           }
                         }));
+                        if (liveSelected.id === "m1") {
+                          onUpdateApplicationStatus("e1", "hired");
+                        }
                       }}
                       className="w-full flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-white transition-opacity hover:opacity-90 active:scale-[0.99]"
                       style={{ background: "#059669", fontSize: 12, fontWeight: 600 }}
