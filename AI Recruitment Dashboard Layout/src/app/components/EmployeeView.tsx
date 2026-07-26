@@ -666,9 +666,12 @@ function ResumeBuilder({ employer }: { employer: Employer }) {
 interface EmployerOverlayProps {
   employer: Employer;
   onClose: () => void;
+  applications: JobApplication[];
+  onApply: (employerId: string, coverNote: string) => void;
 }
 
-function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
+function EmployerOverlay({ employer, onClose, applications, onApply }: EmployerOverlayProps) {
+  const applied = applications.find(app => app.employerId === employer.id);
   const [tab, setTab] = useState<"message" | "resume">("message");
   const [message, setMessage] = useState(
     `Hi ${employer.name} team,\n\nI came across the ${employer.openRole} role and wanted to reach out directly. My background in distributed systems and data infrastructure — including open-source work on Kafka tooling and Delta Lake — maps closely to what you're building.\n\nI'd love to connect and learn more about the team. Happy to share more context on my recent work.\n\n— Jordan Park`
@@ -679,8 +682,69 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
 
   const handleSend = () => {
     setSent(true);
+    onApply(employer.id, tab === "message" ? message : "Attached living resume.");
     setTimeout(() => { onClose(); }, 1600);
   };
+
+  if (applied) {
+    const statusConfig = {
+      sent: { label: "Sent", color: "#71717A", bg: "rgba(113,113,122,0.15)" },
+      read: { label: "Opened", color: "#A78BFA", bg: "rgba(124,58,237,0.15)" },
+      interviewing: { label: "Interview", color: "#38BDF8", bg: "rgba(56,189,248,0.15)" },
+      hired: { label: "Hired", color: "var(--accent-highlight)", bg: "var(--accent-highlight-bg)" }
+    };
+    const currentConfig = statusConfig[applied.status] || statusConfig.sent;
+
+    return (
+      <div className="absolute inset-0 flex flex-col z-30" style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "inherit" }}>
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 pt-14 pb-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <ArrowLeft size={15} color="#A1A1AA" />
+          </button>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: employer.logoBg }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "var(--font-mono)" }}>{employer.logo}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p style={{ fontSize: 14, fontWeight: 700, color: "#F5F5F5", letterSpacing: "-0.01em" }}>{employer.name}</p>
+            <p style={{ fontSize: 11, color: "#71717A", marginTop: 1 }} className="truncate">{employer.openRole}</p>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: currentConfig.bg, border: `1px solid ${currentConfig.color}40` }}>
+            <CheckCircle2 size={24} style={{ color: currentConfig.color }} />
+          </div>
+          <div>
+            <h4 style={{ fontSize: 16, fontWeight: 700, color: "#F5F5F5" }}>Application Active</h4>
+            <p style={{ fontSize: 12, color: "#71717A", marginTop: 6 }} className="max-w-[240px] mx-auto">
+              You submitted your resume and portfolio to {employer.name} for the {employer.openRole} role.
+            </p>
+          </div>
+
+          <div className="rounded-xl p-4 w-full text-left bg-zinc-900/30 border border-zinc-800">
+            <div className="flex justify-between items-center mb-2">
+              <span style={{ fontSize: 11, color: "var(--muted-foreground)" }}>Current Status</span>
+              <span className="rounded-full px-2 py-0.5 uppercase" style={{ fontSize: 9, fontWeight: 700, background: currentConfig.bg, color: currentConfig.color, fontFamily: "var(--font-mono)" }}>
+                {currentConfig.label}
+              </span>
+            </div>
+            <p style={{ fontSize: 12, color: "var(--foreground)", fontWeight: 500 }}>
+              {applied.updates[applied.updates.length - 1]?.label || "Application submitted"}
+            </p>
+            <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 4 }}>
+              {applied.updates[applied.updates.length - 1]?.description || "Your application is active."}
+            </p>
+          </div>
+
+          <button onClick={onClose} className="w-full py-2.5 rounded-xl text-sm" style={{ background: "rgba(255,255,255,0.06)", color: "#E4E4E7", border: "1px solid rgba(255,255,255,0.08)" }}>
+            Close Overlay
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 flex flex-col z-30" style={{ background: "#0A0A0A", borderRadius: "inherit" }}>
@@ -775,7 +839,7 @@ function EmployerOverlay({ employer, onClose }: EmployerOverlayProps) {
 }
 
 /* ─── Employer Discovery Section ─── */
-function EmployerDiscovery() {
+function EmployerDiscovery({ applications, onApply }: { applications: JobApplication[]; onApply: (employerId: string, coverNote: string) => void }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Employer | null>(null);
 
@@ -788,7 +852,14 @@ function EmployerDiscovery() {
 
   return (
     <div className="relative">
-      {selected && <EmployerOverlay employer={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <EmployerOverlay
+          employer={selected}
+          onClose={() => setSelected(null)}
+          applications={applications}
+          onApply={onApply}
+        />
+      )}
 
       {/* Section label + search */}
       <div className="px-5 pt-5 pb-3">
@@ -847,6 +918,11 @@ function EmployerDiscovery() {
                       {employer.hiring && (
                         <span className="rounded-full px-1.5 py-0.5" style={{ fontSize: 8, fontWeight: 700, background: "rgba(163,230,53,0.10)", color: "#A3E635", fontFamily: "var(--font-mono)" }}>HIRING</span>
                       )}
+                      {applications.some(app => app.employerId === employer.id) && (
+                        <span className="rounded-full px-1.5 py-0.5 uppercase" style={{ fontSize: 8, fontWeight: 700, background: "rgba(56,189,248,0.15)", color: "#38BDF8", fontFamily: "var(--font-mono)" }}>
+                          {applications.find(app => app.employerId === employer.id)?.status === "hired" ? "Hired" : applications.find(app => app.employerId === employer.id)?.status === "interviewing" ? "Interview" : applications.find(app => app.employerId === employer.id)?.status === "read" ? "Opened" : "Applied"}
+                        </span>
+                      )}
                     </div>
                     <span className="rounded-md px-2 py-0.5 shrink-0" style={{ fontSize: 10, fontWeight: 700, background: fit.bg, color: fit.text, fontFamily: "var(--font-mono)" }}>
                       {employer.trajectoryFit}%
@@ -899,7 +975,7 @@ function NavigatorTab() {
   return (
     <>
       {/* Employer Discovery */}
-      <EmployerDiscovery />
+      <EmployerDiscovery applications={applications} onApply={onApply} />
 
       {/* Divider */}
       <div className="mx-5 my-1" style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
@@ -1035,9 +1111,26 @@ function NavigatorTab() {
 function PortfolioTab() {
   const [selected, setSelected] = useState<PortfolioSample | null>(null);
 
-  return (
-    <div className="relative flex-1">
-      {selected && <PortfolioDetail sample={selected} onClose={() => setSelected(null)} />}
+  const currentConfig = statusConfig[app.status] || statusConfig.sent;
+
+  const getAiCoachingTip = () => {
+    if (app.status === "sent") {
+      return `Your application is queued in the matching engine. Your low-latency C++ work and Kafka lag exporter projects map exceptionally well to ${app.employerName}'s technology stack, yielding a 94% trajectory score. No actions are required at this stage.`;
+    }
+    if (app.status === "read") {
+      return `A recruiter at ${app.employerName} has opened your portfolio. They are currently analyzing your trajectory gaps. Tip: Ensure your GitHub repositories are actively updated, as they explicitly monitor commit signal velocity.`;
+    }
+    if (app.status === "interviewing") {
+      return `${app.employerName} is conducting technical interviews. Be prepared for:
+• Distributed systems design focusing on Kafka offset consumer lags & partition rebalancing.
+• High-throughput C++ memory fence models & Cache optimizations.
+• Reviewing your merged delta-lake compaction PR.`;
+    }
+    if (app.status === "hired") {
+      return `Welcome aboard! Your customized onboarding check-list has been generated based on your AI trajectory skill gaps. Head to the Onboarding Gateway in your main work shell to review mentorship details and team dependencies.`;
+    }
+    return "";
+  };
 
       <div className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div>
@@ -1072,27 +1165,290 @@ function PortfolioTab() {
                 <ChevronRight size={13} style={{ color: "#52525B" }} />
               </div>
             </div>
-
-            {/* Summary */}
-            <div className="px-4 py-3">
-              <p style={{ fontSize: 12, color: "#A1A1AA", lineHeight: 1.55 }} className="line-clamp-2">{sample.summary}</p>
-            </div>
-
-            {/* Metrics row */}
-            <div className="flex px-4 pb-3 gap-3">
-              {sample.metrics.map((m) => (
-                <div key={m.label} className="flex flex-col gap-0.5">
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#E4E4E7", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em" }}>{m.value}</span>
-                  <span style={{ fontSize: 9, color: "#52525B" }}>{m.label}</span>
-                </div>
-              ))}
-              <div className="ml-auto flex items-end">
-                <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>{sample.age}</span>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <p style={{ fontSize: 9, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Cover Note Sent</p>
+              <div className="rounded-xl px-4 py-3 text-xs text-zinc-300 leading-relaxed border border-zinc-900 bg-zinc-900/30">
+                {app.coverNote || "No cover note was provided."}
               </div>
             </div>
+
+            <div>
+              <p style={{ fontSize: 9, color: "#52525B", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Living Portfolio Attached</p>
+              <div className="rounded-xl border border-zinc-900 overflow-hidden text-xs">
+                <div className="p-3 bg-zinc-900/20 border-b border-zinc-900 flex justify-between items-center">
+                  <span className="font-semibold text-zinc-300">Jordan Park · Portfolio Digest</span>
+                  <span className="text-[9px] bg-emerald-950/50 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-900 font-mono">VERIFIED</span>
+                </div>
+                <div className="p-3 space-y-2">
+                  <div className="flex gap-1.5 flex-wrap">
+                    {["Apache Kafka", "Rust", "C++20", "Delta Lake", "LangChain"].map(s => (
+                      <span key={s} className="bg-zinc-900 px-2 py-0.5 rounded text-[10px] text-zinc-400 font-mono">{s}</span>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-zinc-500">• 2 open-source repositories linked with 3.3k combined stars.</p>
+                  <p className="text-[11px] text-zinc-500">• 1 active compaction patch merged to Apache Delta Lake master.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Actions */}
+      <div className="px-5 pb-8 pt-3 shrink-0 border-t border-zinc-900 flex gap-2">
+        <button
+          onClick={() => onWithdraw(app.id)}
+          className="flex-1 rounded-xl py-2.5 text-xs font-semibold text-red-500 border border-red-900/30 bg-red-950/10 hover:bg-red-950/20 transition-all text-center"
+        >
+          Withdraw
+        </button>
+        <button
+          onClick={onClose}
+          className="flex-1 rounded-xl py-2.5 text-xs font-semibold text-zinc-300 border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/80 transition-all text-center"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Portfolio Tab ─── */
+export function PortfolioTab({ applications: initialApplications }: { applications?: JobApplication[] }) {
+  const [subTab, setSubTab] = useState<"projects" | "applications">("projects");
+  const [selected, setSelected] = useState<PortfolioSample | null>(null);
+  const [selectedApp, setSelectedApp] = useState<JobApplication | null>(null);
+  const [applications, setApplications] = useState<JobApplication[]>(initialApplications || []);
+
+  useEffect(() => {
+    if (initialApplications) {
+      setApplications(initialApplications);
+    }
+  }, [initialApplications]);
+
+  const handleWithdraw = (appId: string) => {
+    if (confirm("Are you sure you want to withdraw this application?")) {
+      setApplications(prev => prev.filter(app => app.id !== appId));
+      setSelectedApp(null);
+    }
+  };
+
+  const statusConfig = {
+    sent: { label: "Sent", color: "#71717A", bg: "rgba(113,113,122,0.15)" },
+    read: { label: "Opened", color: "#A78BFA", bg: "rgba(124,58,237,0.15)" },
+    interviewing: { label: "Interview", color: "#38BDF8", bg: "rgba(56,189,248,0.15)" },
+    hired: { label: "Hired", color: "var(--accent-highlight)", bg: "var(--accent-highlight-bg)" }
+  };
+
+  const stages = [
+    { key: "sent", label: "Applied" },
+    { key: "read", label: "Opened" },
+    { key: "interviewing", label: "Interview" },
+    { key: "hired", label: "Hired" }
+  ];
+
+  return (
+    <div className="relative flex-1">
+      {selected && <PortfolioDetail sample={selected} onClose={() => setSelected(null)} />}
+      {selectedApp && (
+        <ApplicationDetailOverlay
+          app={selectedApp}
+          onClose={() => setSelectedApp(null)}
+          onWithdraw={handleWithdraw}
+        />
+      )}
+
+      {/* Sub-tab selection */}
+      <div className="flex px-5 pt-4 pb-2 gap-2 shrink-0">
+        {(["projects", "applications"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setSubTab(t)}
+            className="flex items-center gap-1.5 rounded-lg px-4 py-2 flex-1 justify-center transition-all duration-150"
+            style={{
+              background: subTab === t ? "var(--accent-highlight-bg)" : "var(--accent)",
+              border: subTab === t ? "1px solid var(--accent-highlight-border)" : "1px solid var(--border)",
+              fontSize: 12,
+              fontWeight: subTab === t ? 600 : 400,
+              color: subTab === t ? "var(--accent-highlight)" : "var(--muted-foreground)",
+            }}
+          >
+            {t === "projects" ? <FolderOpen size={13} /> : <Send size={13} />}
+            {t === "projects" ? "My Work" : `Applications (${applications.length})`}
           </button>
         ))}
       </div>
+
+      {subTab === "projects" ? (
+        <>
+          <div className="px-5 pt-2 pb-2 flex items-center justify-between">
+            <div>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>My Portfolio</span>
+              <div className="flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-highlight)" }} /><span style={{ fontSize: 10, color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>4 items · All verified</span></div>
+            </div>
+            <span className="rounded-full px-2.5 py-1" style={{ fontSize: 10, fontWeight: 600, background: "var(--accent-highlight-bg)", color: "var(--accent-highlight)", border: "1px solid var(--accent-highlight-border)", fontFamily: "var(--font-mono)" }}>LIVE</span>
+          </div>
+
+          <div className="px-5 pb-4 space-y-3">
+            {portfolioSamples.map((sample) => (
+              <button
+                key={sample.id}
+                onClick={() => setSelected(sample)}
+                className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150"
+                style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+              >
+                {/* Card header */}
+                <div className="flex items-start gap-3 p-4" style={{ borderBottom: "1px solid var(--border)" }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${sample.tagColor}14`, border: `1px solid ${sample.tagColor}28` }}>
+                    <PortfolioIcon type={sample.icon} size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{sample.title}</span>
+                      {sample.verified && <CheckCircle2 size={11} style={{ color: "var(--accent-highlight)" }} strokeWidth={2.5} />}
+                    </div>
+                    <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>{sample.subtitle}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <span className="rounded-md px-2 py-0.5" style={{ fontSize: 9, fontWeight: 700, background: `${sample.tagColor}18`, color: sample.tagColor, fontFamily: "var(--font-mono)" }}>{sample.tag}</span>
+                    <ChevronRight size={13} style={{ color: "#52525B" }} />
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="px-4 py-3">
+                  <p style={{ fontSize: 12, color: "#A1A1AA", lineHeight: 1.55 }} className="line-clamp-2">{sample.summary}</p>
+                </div>
+
+                {/* Metrics row */}
+                <div className="flex px-4 pb-3 gap-3">
+                  {sample.metrics.map((m) => (
+                    <div key={m.label} className="flex flex-col gap-0.5">
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#E4E4E7", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em" }}>{m.value}</span>
+                      <span style={{ fontSize: 9, color: "#52525B" }}>{m.label}</span>
+                    </div>
+                  ))}
+                  <div className="ml-auto flex items-end">
+                    <span style={{ fontSize: 10, color: "#52525B", fontFamily: "var(--font-mono)" }}>{sample.age}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="px-5 pt-2 pb-2">
+            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.12em", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>Active Applications</span>
+            <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>Track feedback and stages in real-time</p>
+          </div>
+
+          <div className="px-5 pb-4 space-y-3">
+            {applications.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-zinc-800 rounded-2xl">
+                <Send size={24} style={{ color: "var(--muted-foreground)" }} className="mx-auto mb-2" />
+                <p style={{ fontSize: 13, color: "var(--muted-foreground)" }}>No active applications.</p>
+                <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>Explore roles in Career Navigator to apply.</p>
+              </div>
+            ) : applications.map((app) => {
+              const config = statusConfig[app.status] || statusConfig.sent;
+              const currentStageIndex = stages.findIndex(s => s.key === app.status);
+
+              return (
+                <button
+                  key={app.id}
+                  onClick={() => setSelectedApp(app)}
+                  className="w-full text-left rounded-2xl overflow-hidden transition-all duration-150 relative block p-4"
+                  style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: app.logoBg }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "var(--font-mono)" }}>{app.logo}</span>
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)", letterSpacing: "-0.01em" }}>{app.employerName}</h4>
+                        <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 0.5 }}>{app.openRole}</p>
+                      </div>
+                    </div>
+
+                    <span className="rounded-full px-2 py-0.5 text-xs font-semibold shrink-0" style={{ background: config.bg, color: config.color, fontSize: 10, fontFamily: "var(--font-mono)" }}>
+                      {config.label.toUpperCase()}
+                    </span>
+                  </div>
+
+                  {/* Horizontal step timeline */}
+                  <div className="my-5 relative px-2">
+                    {/* Line behind */}
+                    <div className="absolute left-2 right-2 top-1.5 h-0.5 bg-zinc-800 rounded-full" />
+                    
+                    {/* Line progress */}
+                    <div
+                      className="absolute left-2 top-1.5 h-0.5 transition-all duration-500 rounded-full"
+                      style={{
+                        width: `calc(${(currentStageIndex / (stages.length - 1)) * 100}% - 8px)`,
+                        background: config.color,
+                        boxShadow: `0 0 8px ${config.color}`
+                      }}
+                    />
+
+                    {/* Dots */}
+                    <div className="flex justify-between relative z-10">
+                      {stages.map((st, i) => {
+                        const active = i === currentStageIndex;
+                        const completed = i < currentStageIndex;
+                        const itemConfig = statusConfig[st.key as 'sent'|'read'|'interviewing'|'hired'];
+                        
+                        return (
+                          <div key={st.key} className="flex flex-col items-center">
+                            <div
+                              className="w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-300"
+                              style={{
+                                background: completed ? itemConfig.color : active ? "#0A0A0A" : "#18181B",
+                                border: completed ? "none" : active ? `2px solid ${config.color}` : "2px solid #27272A",
+                                boxShadow: active ? `0 0 10px ${config.color}` : "none",
+                              }}
+                            >
+                              {completed && (
+                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              )}
+                              {active && (
+                                <div className="w-1.5 h-1.5 rounded-full" style={{ background: config.color }} />
+                              )}
+                            </div>
+                            <span
+                              className="text-[9px] mt-2 font-mono font-medium transition-all"
+                              style={{
+                                color: active ? config.color : completed ? "var(--foreground)" : "var(--muted-foreground)"
+                              }}
+                            >
+                              {st.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Foot update description */}
+                  <div className="pt-3 border-t border-zinc-900 flex justify-between items-center text-[11px] text-zinc-500">
+                    <div className="flex items-center gap-1.5 truncate pr-4">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: config.color }} />
+                      <span className="truncate">{app.updates[app.updates.length - 1]?.description || "Applied successfully"}</span>
+                    </div>
+                    <span className="font-mono text-[10px] shrink-0">{app.updates[app.updates.length - 1]?.time || "Just now"}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
